@@ -31,7 +31,7 @@ if [ `echo $SPECIFICIP | grep -oP "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3
 else
 	echo "SELECT *, ROUND(SUM(bytes) / 1024 / 1024 / 1000, 2) AS gb_total FROM acct WHERE ip_src != '0.0.0.0' AND ip_src != '10.1.13.14' AND ip_src != '10.1.13.12' AND ip_src NOT LIKE '10.1.%.1' AND stamp_inserted > (NOW() - INTERVAL $TIMEPERIOD HOUR) GROUP BY ip_src HAVING gb_total > $QUOTA ORDER BY gb_total DESC;" | ssh $SSHHOST mysql -N -u$MYSQLUSER -p$MYSQLPWD pmacct|awk '{print $1,"\t"$10"GB"}' > /tmp/pmacctusage.txt
 		 if [ "`cat /tmp/pmacctusage.txt |wc -l`" == "0" ]; then
-                        echo "OK - No users exeeded threshold"
+                        echo "OK - No users exceeded threshold"
                         exit ${E_SUCCESS}
                 else
                         echo "CRITICAL - Users exceeded quota `cat /tmp/pmacctusage.txt|sed -e :a -e N -e 's/\n/, /' -e ta`"
