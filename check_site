@@ -1,0 +1,28 @@
+#!/bin/bash
+
+HOSTNAME=$1
+LINECOUNT=$2
+WEBSITEDATA="`curl -G -L -s $HOSTNAME | wc -l`"
+
+E_SUCCESS="0"
+E_CRITICAL="2"
+
+number=0   #initialize
+FLOOR=1
+RANGE=25
+while [ "$number" -le $FLOOR ]
+do
+  number=$RANDOM
+  let "number %= $RANGE"  # Scales $number down within $RANGE.
+done
+
+sleep $number
+
+
+if [ "$WEBSITEDATA" -ge "$LINECOUNT" ]; then
+	echo "OK - $HOSTNAME has content"
+	exit $E_SUCCESS
+	else
+	echo "CRITICAL - $HOSTNAME potentially missing content"
+	exit $E_CRITICAL 
+fi
