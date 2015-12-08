@@ -1,18 +1,5 @@
 #!/bin/bash
-# Zimbra per-account backup check.
-# Vesion 1.3 rewritten by Oli
-# Setup cron job to list accounts existing at 3AM for each server.
-# Compares the backed up accounts against that list, rather than a new list each time which potentially contains new accounts
-#59 02 * * * zimbra zmprov -l gaa -s subsoil.colo.sol1.net > /tmp/originalmailboxes.txt
-
-rm -f /tmp/$SERVER-status.txt
-
-if [ $# -eq 0 ]
-  then
-        echo "No arguments supplied - Specify the server to check for backups"
-        exit 255
-
-fi
+# backup query and checker 1.2 by sean
 
 SERVER=$1
 CHECK=Unknown
@@ -24,10 +11,21 @@ checkexitstatus () {
         fi
 }
 
+rm -f /tmp/$SERVER-status.txt
+
+if [ $# -eq 0 ]
+  then
+	echo "No arguments supplied"
+	exit 255
+
+fi
+
+ssh zimbra@$SERVER "rm -f /tmp/$SERVER.txt"
+ssh zimbra@$SERVER "zmprov -s $SERVER gqu $SERVER | cut -d ' ' -f 1| sort > /tmp/$SERVER.txt"
+checkexitstatus                
 ssh zimbra@$SERVER "zmbackupquery -v $SERVER |grep @ | cut -d ' ' -f 3- | cut -d ':' -f 1| sort |uniq > /tmp/$SERVER-backups.txt"
 checkexitstatus
-ssh zimbra@$SERVER "comm -23 <(sort /tmp/originalmailboxes.txt) <(sort /tmp/$SERVER-backups.txt)" > /tmp/$SERVER-status.txt
-checkexitstatus
+ssh zimbra@$SERVER "comm -23 /tmp/$SERVER.txt /tmp/$SERVER-backups.txt" > /tmp/$SERVER-status.txt
 
 if [ $(wc -l /tmp/$SERVER-status.txt |cut -f 1 -d " ") -gt 0 ]
         then
@@ -43,5 +41,5 @@ if [[ "$CHECK" == "OK" ]]; then
 elif [[ "$CHECK" == "Failed" ]]; then
    exit 2
 else
-   exit 255
+   exit 3
 fi
