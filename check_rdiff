@@ -121,7 +121,7 @@ $grace_period = $grace_period * 3600;                                   # now co
 
 if(!-d$repository)
 {
-        print "Invalid repository directory\n";
+        print "Invalid repository directory ($repository)\n";
         exit(3);
 }
 
