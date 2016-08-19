@@ -6,89 +6,88 @@
 # Usage: command server.domain "/dir/dir" "cust1 cust2/dir1"
 # 	 - exclude is optional
 
+function checkParam() {
+ local name="$1"
+ local param="$2"
+
+        if [ -z "$param" ] ; then
+                MESSAGE="${MESSAGE} $name"
+        fi
+}
+
+function trimMessage() {
+	MESSAGE="$(echo -e "${MESSAGE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' )"
+}
+
+
 STATE_OK=0
 STATE_WARNING=1
 STATE_CRITICAL=2
 STATE_UNKNOWN=3
 
+exitCode=$STATE_UNKNOWN
+MESSAGE=""
+
 LOGIN_USER="nagioschecker"
 
-exitCode=$STATE_UNKNOWN
-
-echo $@ > /tmp/check.tmp
-
-if [ -n "$1" ] && [ -n "$2" ]; then
+if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 	backupServer="$1"
 	backupRoot="$2"
-	exclude="$3"
+	depth="$3"
+	exclude=`echo "$4" | sed -e "s/,/ /g"`
 
 	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then		# Can we login
 
-                # Login a backup server using the backup user and get list of customer dirs
-		backupCusts=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth 1 -maxdepth 1 -type d" | sed -e "s:${backupRoot}/::g"`
+                # Login a backup server using the backup user and get list of backup dirs
+		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d" | sed -e "s:${backupRoot}/::g"`
 		if  [ $? -eq 0 ] ; then
-
-	                # Exclude all backups for parent directory
-        	        custDirs=""
-                	for cust in ${backupCusts}; do
-				# 2>/dev/null is used due to a broken pipe error, preceeding echo with unbuffer may be a better option
-                        	if ! echo "${exclude}" 2>/dev/null | grep -q -w "$cust" ; then
-                                	custDirs=`echo "${backupRoot}/$cust ${custDirs}"`
-	                        fi
-        	        done
-
-			# Login a backup server using the backup user and get list of backup dirs 
-			backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${custDirs} -mindepth 1 -maxdepth 1 -type d" | sed -e "s:${backupRoot}/::g"`
-			if  [ $? -eq 0 ] ; then
-	
-				MESSAGE=""
-				for dir in ${backupDirs}; do 
-					if ! echo "${exclude}" 2>/dev/null | grep -q -w "$dir" ; then	# Skip excluded hostnames
-						# This is the check for you rdiff config and need to be setup for how the config is setup
-						if ! grep "vars.rdiffs" /etc/icinga2/conf.d/* 2>/dev/null | grep -q "${dir}" ; then	# Critical on missing backup checks for host
-
-							MESSAGE="${MESSAGE} ${dir}"
-							exitCode=$STATE_CRITICAL
-						fi
+			MESSAGE=""
+			for dir in ${backupDirs}; do 
+				excluded=false
+				for part in $(seq 1 $depth) ; do 	# test each part of a path for exclusions
+					if echo " ${exclude}" 2>/dev/null | grep -q -w `echo " $dir" | cut -f1-$part -d"/"` ; then	# Skip excluded name
+						excluded=true	
 					fi 
 				done
 
-				if [ ${exitCode} -eq $STATE_CRITICAL ]; then
-					MESSAGE="Missing backup checks for `echo $MESSAGE | sed -e 's/ *$//g'`"
-				else
-					MESSAGE="No missing backup checks"
-					exitCode=$STATE_OK
+				if [ $excluded = false ] ; then
+					# This is the check for you rdiff config and need to be setup for how the config is setup
+					if ! grep "vars.rdiffs" /etc/icinga2/conf.d/* 2>/dev/null | grep -q "${dir}" ; then	# Critical on missing backup checks for host
+						MESSAGE="${MESSAGE} ${dir}"
+						exitCode=$STATE_CRITICAL
+					fi
 				fi
-		
-				if [ -n "$2" ]; then
-					MESSAGE="$MESSAGE ($exclude excluded)"
-				fi
+			done
+
+			if [ ${exitCode} -eq $STATE_CRITICAL ]; then
+				MESSAGE="Missing backup checks for `echo $MESSAGE | sed -e 's/ *$//g'`"
 			else
-		    		MESSAGE="Error finding parent backups directories"
-				exitCode=$STATE_CRITICAL
+				MESSAGE="No missing backup checks"
+				exitCode=$STATE_OK
+			fi
+	
+			if [ -n "$2" ]; then
+				MESSAGE="$MESSAGE ($exclude excluded)"
 			fi
 		else
-			MESSAGE="Error finding child backups directories"
+	    		MESSAGE="Error finding backups directories"
 			exitCode=$STATE_CRITICAL
 		fi
-
 	else
 	    MESSAGE="Unable to connect to $backupServer"
 	    exitCode=$STATE_WARNING
 	fi
 else
 	exitCode=$STATE_UNKNOWN
-
-	if [ -n "$1" ] ; then
-		MESSAGE="Null server paramater ($@)"
-	fi
-
-	if [ -n "$2" ] ; then
-		MESSAGE="${MESSAGE} Null backup root paramater ($@)"
-	fi
+	checkParam "server" "$1"
+	checkParam "directory" "$1"
+	checkParam "depth" "$1"
+ 
+    	trimMessage
+    	MESSAGE="Missing paramaters ${MESSAGE} ($@)"
 fi
 
-MESSAGE="$(echo -e "${MESSAGE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' )"
+trimMessage
 
 if [ $exitCode -eq $STATE_UNKNOWN ]; then
     echo "UNKNOWN - $MESSAGE"
