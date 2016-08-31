@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+
+function checkParam() {
+	local name="$1"
+	local param="$2"
+
+        if [ -z "$param" ] ; then
+                MESSAGE="${MESSAGE} $name"
+        fi
+}
+
+function trimMessage() {
+	MESSAGE="$(echo -e "${MESSAGE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' )"
+}
+
+
+STATE_OK=0
+STATE_WARNING=1
+STATE_CRITICAL=2
+STATE_UNKNOWN=3
+
+exitCode=$STATE_UNKNOWN
+MESSAGE=""
+
+
+if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ] && [ -n "$4" ] && [ -n "$5" ]; then
+        sourceFile="$1"
+        destFile="$2"
+	warning="$3"
+	critical="$4"
+	srcAge="$5"
+
+
+	aliveFile="~.canaryAlive"
+
+	if [ -e "${sourceFile}" ] ; then
+		srcEpoch=`head -n1 ${sourceFile}`
+		currentEpoch=`date +%s`
+		if [ $(($currentEpoch - $srcEpoch)) -gt $srcAge ] ; then
+			exitCode=$STATE_CRITICAL
+			MESSAGE="Source file is too old, $(($currentEpoch - $srcEpoch)) seconds older than now"
+		else 
+			if [ -e "${destFile}" ] ; then
+				destEpoch=`head -n1 ${destFile}`
+				offset=$(($srcEpoch - $destEpoch))	
+				if [ $offset -gt $critical ] ; then
+					exitCode=$STATE_CRITICAL
+					MESSAGE="which is more than $critical seconds old"
+				elif [ $offset -gt $warning ] ; then
+					exitCode=$STATE_WARNING
+					MESSAGE="which is more than $warning seconds old"
+				elif [ $offset -lt 0 ] ; then
+					exitCode=$STATE_CRITICAL
+					MESSAGE="is newer than the source file"
+				else
+					exitCode=$STATE_OK
+					MESSAGE=""
+				fi
+
+				MESSAGE="Destination file has $offset second offset to source ${MESSAGE}"		
+	
+			else
+				exitCode=$STATE_CRITICAL
+				MESSAGE="Missing destination file"
+			fi
+		fi
+
+	else
+		if [ -e "${aliveFile}" ] ; then
+			exitCode=$STATE_CRITICAL
+			MESSAGE="Missing source file"
+		else 
+			exitCode=$STATE_OK
+			MESSAGE="First run, no source file"
+			touch "${aliveFile}"
+		fi
+	fi
+	
+	# change the source time after running tests even if it doesn't already exist
+	date +%s > ${sourceFile}
+	date >> ${sourceFile}
+
+else
+        exitCode=$STATE_UNKNOWN
+
+	checkParam "source" "$1"
+       	checkParam "destination" "$2"
+	checkParam "warning" "$3"
+	checkParam "critical" "$4"
+	checkParam "source_age" "$5"
+
+	trimMessage
+	MESSAGE="Missing paramaters ${MESSAGE}"
+fi
+
+trimMessage
+
+if [ $exitCode -eq $STATE_UNKNOWN ]; then
+    echo "UNKNOWN - $MESSAGE"
+elif [ $exitCode -eq $STATE_CRITICAL ]; then
+    echo "CRITICAL - $MESSAGE"
+elif [ $exitCode -eq $STATE_WARNING ]; then
+    echo "WARNING - $MESSAGE"
+elif [ $exitCode -eq $STATE_OK ]; then
+    echo "OK - $MESSAGE"
+fi
+
+exit $exitCode
+

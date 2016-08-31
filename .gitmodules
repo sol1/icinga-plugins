@@ -1,0 +1,3 @@
+[submodule "icinga-check-rabbitmq"]
+	path = icinga-check-rabbitmq
+	url = https://github.com/sol1/icinga-check-rabbitmq.git
