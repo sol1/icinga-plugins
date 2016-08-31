@@ -56,6 +56,7 @@ my $time_stamp;
 my $no_mir;
 my $stats_fn;
 my $elapsed;
+my $last_backup;
 my $cur_mir;
 my @now;
 my $pid_1;
@@ -271,8 +272,13 @@ if($no_mir == 2)
                 $pid_2 = <FILE>;
                 running() if ($pid_2 =~ /rdiff-backup/);
         }
+	
+	# Get the session statistic from the oldest mirror marker
+        ($time_stamp) = ($mir_list[0] =~ /current_mirror\.(.*)\.data$/);
+        $stats_fn = "$repository/session_statistics.$time_stamp.data";
+	$last_backup = localtime(stat($stats_fn)->mtime);
 
-        print "CRITICAL: Backup interrupted";
+        print "CRITICAL: Backup interrupted. Best recent backup $last_backup.\n";
         exit(2);
 }
 
@@ -284,17 +290,18 @@ sub running()
         $cur_mir = <$repository/current_mirror*>;
         ($time_stamp) = ($mir_list[0] =~ /current_mirror\.(.*)\.data$/);
         $stats_fn = "$repository/session_statistics.$time_stamp.data";
+	$last_backup = localtime(stat($stats_fn)->mtime);
         $elapsed = ((time() - $cron_cycle) - stat($stats_fn)->mtime);
         if($elapsed > 0)
         {
                 if($now[2] >= $c_thresh)
                 {
-                        print "CRITICAL: Backup still running after $c_thresh:00\n";
+                        print "CRITICAL: Backup still running after $c_thresh:00. Best recent backup $last_backup\n";
                         exit(2);
                 }
                 if($now[2] >= $w_thresh)
                 {
-                        print "WARNING: Backup running after $w_thresh:00\n";
+                        print "WARNING: Backup running after $w_thresh:00. Best recent backup $last_backup\n";
                         exit(1);
                 }
         }
