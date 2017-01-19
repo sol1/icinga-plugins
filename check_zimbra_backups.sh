@@ -3,9 +3,10 @@
 # Vesion 1.3 rewritten by Oli
 # Setup cron job to list accounts existing at 3AM for each server.
 # Compares the backed up accounts against that list, rather than a new list each time which potentially contains new accounts
+# 	Does a remote check by default (relies on the host running this script having ssh keys to zimbra@remote_host)
+# 	Does a local check if the server is set as "localhost"
 #59 02 * * * zimbra zmprov -l gaa -s subsoil.colo.sol1.net > /tmp/originalmailboxes.txt
 
-rm -f /tmp/$SERVER-status.txt
 
 if [ $# -eq 0 ]
   then
@@ -14,8 +15,12 @@ if [ $# -eq 0 ]
 
 fi
 
-SERVER=$1
 CHECK=Unknown
+SERVER=$1
+BACKUP_TXT="/tmp/$SERVER-backups.txt"
+STATUS_TXT="/tmp/$SERVER-status.txt"
+MAILBOXES_TXT="/tmp/originalmailboxes.txt"
+
 
 checkexitstatus () {
         if [ "$?" != "0" ]
@@ -24,14 +29,26 @@ checkexitstatus () {
         fi
 }
 
-ssh zimbra@$SERVER "zmbackupquery -v $SERVER |grep @ | cut -d ' ' -f 3- | cut -d ':' -f 1| sort |uniq > /tmp/$SERVER-backups.txt"
-checkexitstatus
-ssh zimbra@$SERVER "comm -23 <(sort /tmp/originalmailboxes.txt) <(sort /tmp/$SERVER-backups.txt)" > /tmp/$SERVER-status.txt
-checkexitstatus
 
-if [ $(wc -l /tmp/$SERVER-status.txt |cut -f 1 -d " ") -gt 0 ]
+rm -f ${STATUS_TXT}
+
+
+if [ "$SERVER" == "localhost" ] ; then
+	su zimbra -l -c "zmbackupquery -v $SERVER |grep @ | cut -d ' ' -f 3- | cut -d ':' -f 1| sort |uniq > ${BACKUP_TXT}"
+	checkexitstatus
+	su zimbra -l -c "comm -23 <(sort ${MAILBOXES_TXT}) <(sort ${BACKUP_TXT})" > ${STATUS_TXT}
+	checkexitstatus
+else
+	ssh zimbra@$SERVER "zmbackupquery -v $SERVER |grep @ | cut -d ' ' -f 3- | cut -d ':' -f 1| sort |uniq > ${BACKUP_TXT}"
+	checkexitstatus
+	ssh zimbra@$SERVER "comm -23 <(sort ${MAILBOXES_TXT}) <(sort ${BACKUP_TXT})" > ${STATUS_TXT}
+	checkexitstatus
+
+fi
+
+if [ $(wc -l ${STATUS_TXT} |cut -f 1 -d " ") -gt 0 ]
         then
-                echo "$SERVER: $(wc -l /tmp/$SERVER-status.txt |cut -f 1 -d " ") accounts do not have a backup: `cat /tmp/$SERVER-status.txt | sed ':a;N;$!ba;s/\n/ /g'`"
+                echo "$SERVER: $(wc -l ${STATUS_TXT} |cut -f 1 -d " ") accounts do not have a backup: `cat ${STATUS_TXT} | sed ':a;N;$!ba;s/\n/ /g'`"
                 CHECK=Failed
         else
                 echo "$SERVER: all accounts have a backup"
