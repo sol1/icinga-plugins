@@ -3,10 +3,11 @@
 
 # Note, since this no longer queries the database directly,
 # args $1 and $2 are superfluous - should update the icinga check to account for this at some stage
+# Removed in icinga2 scripts
 
 
 #in seconds
-MAXAGE=$3
+MAXAGE=$1
 
 CDRTIME=`date -d "\`{ echo "sniffer_stat"; sleep 1; } | telnet -E 10.254.254.1 5029 2>/dev/null | grep "storingCdrLastWriteAt" | /usr/local/sbin/parse_json.py\`" +"%s"`
 CURTIME=`date +"%s"`
