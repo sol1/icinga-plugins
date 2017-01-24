@@ -39,7 +39,7 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then		# Can we login
 
                 # Login a backup server using the backup user and get list of backup dirs
-		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d" | sed -e "s:${backupRoot}/::g"`
+		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d" | sed -e "s:${backupRoot}/::g" | sort`
 		if  [ $? -eq 0 ] ; then
 			MESSAGE=""
 			for dir in ${backupDirs}; do 

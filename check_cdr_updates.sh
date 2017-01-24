@@ -1,10 +1,22 @@
 #!/bin/bash
 # check if voipmonitor's CDR table has recent call data
 
+# Note, since this no longer queries the database directly,
+
 #in seconds
+SERVER=$1
+PORT=$2
 MAXAGE=$3
 
-TIMESINCE=`mysql voipmonitor -BN -h $1 -u $2 -e 'select cast((now() - max(calldate)) AS SIGNED) from cdr;'`
+CDRTIME=`date -d "\`{ echo "sniffer_stat"; sleep 1; } | telnet -E $SERVER $PORT 2>/dev/null | grep "storingCdrLastWriteAt" | /usr/local/sbin/parse_json.py\`" +"%s"`
+CURTIME=`date +"%s"`
+
+TIMESINCE=`expr $CURTIME - $CDRTIME`
+
+#TIMESINCE=`mysql voipmonitor -BN -h $1 -u $2 -e 'select cast((now() - max(calldate)) AS SIGNED) from cdr;'`
+
+#date >> /var/log/sensor-test.log
+#{ echo "sniffer_stat"; sleep 1; } | telnet -E 10.254.254.1 5029 2>/dev/null | grep "storingCdrLastWriteAt" | python -m json.tool >> /var/log/sensor-test.log
 
 RES=$(($MAXAGE < $TIMESINCE))
 

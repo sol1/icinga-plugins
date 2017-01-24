@@ -1,0 +1,136 @@
+#!/bin/sh
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Based partially on the work done by By Nicole in the check_ipsec script
+#
+# Plugin Name: check_ipsec2
+# Version: 0.1b
+# Date: 24/04/2013
+#
+# Usage: check_ipsec2 --tunnels <n>
+#        check_ipsec2 --tunnel <tunnel name>
+#
+#
+# ------------Defining Variables------------
+PROGNAME=`basename $0`
+PROGPATH=`echo $0 | sed -e 's,[\\/][^\\/][^\\/]*$,,'`
+REVISION="0.1b"
+DOWN=""
+IPSECBIN=`which ipsec`
+
+AUTHOR="Copyright 2013, Charles Williams (chuck@itadmins.net) (http://www.itadmins.net/)"
+
+missing="O"
+
+#. $PROGPATH/utils.sh
+
+
+print_version() {
+    echo "$VERSION $AUTHOR"
+}
+
+print_usage() {
+        echo "Usage:"
+        echo " $PROGNAME --tunnels|-n <number of configured tunnels>"
+        echo " $PROGNAME --tunnel|-t <name of tunnel>"
+        echo " $PROGNAME --help|-h"
+        echo " $PROGNAME --version|-v"
+		echo ""
+}
+
+print_help() {
+        print_revision $PROGNAME $REVISION
+        echo ""
+        print_usage
+        echo ""
+}
+
+if [ $# -eq 0 ];
+then
+   print_help
+   exit $STATE_UNKNOWN
+fi
+
+test -e $IPSECBIN
+if [ $? -ne 0 ];
+then
+	echo CRITICAL - $IPSECBIN not exist
+	exit $STATE_CRITICAL
+else
+	STRONG=`$IPSECBIN --version |grep strongSwan | wc -l`
+fi
+
+check_tunnels() {
+
+	if [ "$STRONG" -eq "1" ]
+	then
+	    eroutes=`$IPSECBIN status | grep -e "INSTALLED, " | wc -l`
+	else
+	    eroutes=`$IPSECBIN whack --status | grep -e "IPsec SA established" | grep -e "newest IPSEC" | wc -l`
+	fi 
+
+	
+	if [ "$eroutes" -eq "$1" ]
+	then
+		echo "OK - All $1 tunnels are up and running"
+		exit $STATE_OK
+	elif [ "$eroutes" -gt "$1" ]
+	then
+		echo "WARNING - More than $1 ($eroutes) tunnels are up and running"
+                exit $STATE_WARNING
+	else
+		echo "CRITICAL - Only $eroutes tunnels from $1 are up and running."
+		exit $STATE_CRITICAL
+	fi
+}
+
+check_tunnel() {
+	if [ "$STRONG" -eq "1" ]
+	then
+			eroutes=`$IPSECBIN status | grep -e "$1" | grep -e "INSTALLED, " | wc -l`
+	else
+			eroutes=`$IPSECBIN whack --status | grep -e "IPsec SA established" | grep -e "$2" | wc -l`
+	fi
+	
+	if [ "$eroutes" -eq "1" ]
+	then
+		echo "OK - $1 VPN is up and running"
+		exit $STATE_OK
+	else
+		echo "CRITICAL - $1 VPN is down"
+		exit $STATE_CRITICAL
+	fi
+}
+
+case "$1" in
+--help | -h)
+        print_help
+        exit $STATE_OK
+        ;;
+--version | -v)
+        print_revision $PLUGIN $REVISION
+        exit $STATE_OK
+        ;;
+--tunnels | -n)
+	check_tunnels $2
+	;;
+--tunnel | -t)
+	check_tunnel $2
+	;;
+*)
+        print_help
+        exit $STATE_OK
+
+esac
