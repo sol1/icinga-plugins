@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Sanity check
+if [ $# -ne 1 ]; then
+        echo "Usage: $0 [queue]"
+        exit
+fi
+
+# Check dependencies
+if [ `which rt` -eq 1 ]; then
+	echo "Missing rt cli client."
+fi
+
+# Set RT credentials as environment variables.
+export RTUSER=oliver.lowe
+export RTPASSWD=peRgeOuSib
+export RTSERVER=https://rt.sol1.net
+
+QUEUE=$1
+
+# Set standard nagios/icinga return codes/service statuses.
+E_SUCCESS="0"
+E_WARNING="1"
+E_CRITICAL="2"
+E_UNKNOWN="3"
+
+query="/opt/rt4/bin/rt ls -iq $QUEUE Status=new"
+
+# Test the size, in bytes, of what the rt query returns. If no tickets, the
+# query returns just the newline character. Otherwise, there are new tickets.
+if [ `$query | wc -c` -le 1 ]; then
+        echo "No new tickets in $QUEUE"
+        exit ${E_SUCCESS}
+elif [ `$query | wc -c` -gt 1 ]; then
+        echo "New tickets in $QUEUE"
+        exit ${E_CRITICAL}
+else
+        echo "Unexpected error"
+        exit ${E_UNKNOWN}
+fi
