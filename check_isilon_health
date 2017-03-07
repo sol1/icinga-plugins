@@ -41,13 +41,12 @@ do INODEPERCENT=`cat /tmp/df-i|head -$LINE|tail -1|awk '{print $8}'`
 	FILESYSTEM=`cat /tmp/df-i|head -$LINE|tail -1|awk '{print $1}'`
 	INODENUM=`echo $INODEPERCENT|tr -d %`
 
-	if [ $INODENUM -gt 90 ]
-	then 
-	echo "CRITICAL: Inode percentage of $INODEPERCENT on $FILESYSTEM"
+	if [ $INODENUM -gt 90 ]; then
+		echo "CRITICAL: Inode percentage of $INODEPERCENT on $FILESYSTEM"
 	exit 2
 	else 
-	echo "OK: Inode usage levels look OK of $INODEPERCENT on $FILESYSTEM"
-	STATUS=OK
+		echo "OK: Inode usage levels look OK of $INODEPERCENT on $FILESYSTEM"
+		STATUS=OK
 	fi
 
         LINE=$[$LINE+1]
@@ -66,45 +65,40 @@ esac
 
 check_devices () {
 #sh root@$HOST isi devices 
-if [ `check_version` == "7" ]
-then
-UNHEALTHYDEVICES=`timeout 15 ssh root@$HOST isi devices|grep -v HEALTHY|grep -v OK|wc -l`
-NUMDEVICES=`timeout 15 ssh root@$HOST isi devices|grep -v OK|wc -l`
+	if [ `check_version` == "7" ]
+		then
+		UNHEALTHYDEVICES=`timeout 15 ssh root@$HOST isi devices|grep -v HEALTHY|grep -v OK|wc -l`
+		NUMDEVICES=`timeout 15 ssh root@$HOST isi devices|grep -v OK|wc -l`
 
-if [ $UNHEALTHYDEVICES -gt 0 ]
-	then echo "CRITICAL: Some devices are unhealthy"
-	exit 2
-	else echo "OK: All $NUMDEVICES devices are healthy"
-	exit 0
-fi
-else
-UNHEALTHYDEVICES=`timeout 15 ssh root@$HOST isi devices drive list|grep Bay|grep -v L3|grep -v HEALTHY|grep -v OK|wc -l`
-NUMDEVICES=`timeout 15 ssh root@$HOST isi devices drive list|grep Bay|grep -v L3|grep -v OK|wc -l`
+		if [ $UNHEALTHYDEVICES -gt 0 ]
+			then echo "CRITICAL: Some devices are unhealthy"
+			exit 2
+			else echo "OK: All $NUMDEVICES devices are healthy"
+			exit 0
+		fi
+		else
+			UNHEALTHYDEVICES=`timeout 15 ssh root@$HOST isi devices drive list|grep Bay|grep -v L3|grep -v HEALTHY|grep -v OK|wc -l`
+			NUMDEVICES=`timeout 15 ssh root@$HOST isi devices drive list|grep Bay|grep -v L3|grep -v OK|wc -l`
 
-if [ $UNHEALTHYDEVICES -gt 0 ]
-	then echo "CRITICAL: Some devices are unhealthy"
-	exit 2
-	else echo "OK: All $NUMDEVICES devices are healthy"
-	exit 0
-fi
-
-
-
-
-fi
-
+		if [ $UNHEALTHYDEVICES -gt 0 ]
+			then echo "CRITICAL: Some devices are unhealthy"
+			exit 2
+		else echo "OK: All $NUMDEVICES devices are healthy"
+			exit 0
+		fi
+	fi
 }
 
 check_closed_connections () {
-CONNCOUNT=`timeout 15 ssh root@$HOST netstat -an | grep 2049 | grep CLOSE | wc -l`
-if [ $CONNCOUNT -ge 80 ]
+	CONNCOUNT=`timeout 15 ssh root@$HOST netstat -an | grep 2049 | grep CLOSE | wc -l`
+	if [ $CONNCOUNT -ge 80 ]
         then echo "CRITICAL: NFS Closed Connections ($CONNCOUNT) are more than 90 - you might need to restart the NFS process"
         exit 2
-        else echo "OK: Closed NFS connections are less than 90 ($CONNCOUNT)"
-        exit 0
+	else
+		echo "OK: Closed NFS connections are less than 90 ($CONNCOUNT)"
+	exit 0
 fi
 }
-
 
 case $FUNCTION in
 	check_cluster_health)
@@ -123,6 +117,3 @@ case $FUNCTION in
 	usage
 	;;
 esac
-	
-
-
