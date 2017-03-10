@@ -34,6 +34,7 @@ CMD_DIR="$(cd "$(dirname "$CMD")" && pwd -P)"
 [ "$VERBOSE" ] ||  VERBOSE=
 [ "$DEBUG" ]   ||  DEBUG=
 [ "$QUEUE" ]   ||  QUEUE=
+[ "$AUTH" ]    ||  AUTH=
 [ "$WARN" ]    ||  WARN=0
 [ "$CRIT" ]    ||  CRIT=0
 
@@ -83,6 +84,10 @@ NARGS=-1; while [ "$#" -ne "$NARGS" ]; do NARGS=$#; case $1 in
 		shift && WARN="$1" && shift && vrb "#-INFO: WARN=$WARN"; ;;
 	-c|--crit)     # Set a crit to a value (DEFAULT: $CRIT)
 		shift && CRIT="$1" && shift && vrb "#-INFO: CRIT=$CRIT"; ;;
+	-a|--auth)     # Set a auth to a value (DEFAULT: $AUTH)
+		shift && AUTH="$1" && shift && vrb "#-INFO: AUTH=$AUTH"; ;;
+	-u|--url)     # Set a crit to a value (DEFAULT: $URL)
+		shift && URL="$1" && shift && vrb "#-INFO: URL=$URL"; ;;
 
 	*)
 		break;
@@ -93,33 +98,44 @@ esac; done
 # Make sure required paramaters exit
 if [ ! -z "$QUEUE" ] ; then
 
-	# Set RT credentials as environment variables.
-	export RTUSER=slamonitor
-	export RTPASSWD=Q2aw34Q2aw34
-	export RTSERVER=https://rt.sol1.net
+	# Make sure the auth file exists
+	if [ -f "$AUTH" ] ; then
+		. $AUTH
 
-	wdate=`date -d "$WARN minutes ago" "+%Y-%m-%d %H:%M:%S"`
-	cdate=`date -d "$CRIT minutes ago" "+%Y-%m-%d %H:%M:%S"`
+		# Make sure the username and password in the auth file are set
+		if [ ! -z "$username" ] && [ ! -z "$password" ] ; then
 
-	# RT queries equal "" if there are no results, ticket is a sting that exists when there are tickets
-	# Not sure how to test if the queries work
-	wquery=`rt ls -q $QUEUE -i "Status=new and Created<'$wdate'" | grep "ticket" | wc -l`
-	cquery=`rt ls -q $QUEUE -i "Status=new and Created<'$cdate'" | grep "ticket" | wc -l`
+			# Set RT credentials as environment variables.
+			export RTUSER=$username
+			export RTPASSWD=$password
+			export RTSERVER=$URL
 
-	if [ "$cquery" -gt 0 ]; then 
-		MESSAGE="new tickets in $QUEUE : $cquery outside sla : `rt ls -q $QUEUE "Status=new" -f subject,created -r|sed '/^id.*$/d'`"
-		EXIT_CODE=$STATE_CRITICAL
-	elif [ "$wquery" -gt 0 ]; then
-                MESSAGE="new tickets in $QUEUE : $wquery within sla : `rt ls -q $QUEUE "Status=new" -f subject,created -r|sed '/^id.*$/d'`"
-                EXIT_CODE=$STATE_WARNING
-	elif [ "$cquery" -eq 0 ] && [ "$wquery" -eq 0 ]; then
-		MESSAGE="No new tickets in $QUEUE"
-                EXIT_CODE=$STATE_OK
+			wdate=`date -d "$WARN minutes ago" "+%Y-%m-%d %H:%M:%S"`
+			cdate=`date -d "$CRIT minutes ago" "+%Y-%m-%d %H:%M:%S"`
+
+			# RT queries equal "" if there are no results, ticket is a sting that exists when there are tickets
+			# Not sure how to test if the queries work
+			wquery=`rt ls -q $QUEUE -i "Status=new and Created<'$wdate'" | grep "ticket" | wc -l`
+			cquery=`rt ls -q $QUEUE -i "Status=new and Created<'$cdate'" | grep "ticket" | wc -l`
+
+			if [ "$cquery" -gt 0 ]; then 
+				MESSAGE="new tickets in $QUEUE : $cquery outside sla : `rt ls -q $QUEUE "Status=new" -f subject,created -r|sed '/^id.*$/d'`"
+				EXIT_CODE=$STATE_CRITICAL
+			elif [ "$wquery" -gt 0 ]; then
+				MESSAGE="new tickets in $QUEUE : $wquery within sla : `rt ls -q $QUEUE "Status=new" -f subject,created -r|sed '/^id.*$/d'`"
+				EXIT_CODE=$STATE_WARNING
+			elif [ "$cquery" -eq 0 ] && [ "$wquery" -eq 0 ]; then
+				MESSAGE="No new tickets in $QUEUE"
+				EXIT_CODE=$STATE_OK
+			else
+				MESSAGE="Unexpected error"
+			fi
+		else
+			MESSAGE="Auth file missing username ($username) or password ($password)"
+		fi
 	else
-		MESSAGE="Unexpected error"
+		MESSAGE="Auth file ($AUTH) doesn't exist"
 	fi
-
-
 else
 	MESSAGE="No queue set"
 fi
