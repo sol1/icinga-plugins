@@ -20,38 +20,37 @@ SESSION = requests.session()
 
 def authenticate_rt(username, password):
     '''Authenticates with the RT server for all subsequent requests'''
-    res = SESSION.post("https://rt.sol1.net", data={"user": username, "pass": password})
-    # print(res.text)
+
+    SESSION.post("https://rt.sol1.net", data={"user": username, "pass": password})
 
 def create_ticket():
     '''Creates a ticket in RT and returns the ticket ID'''
-    ticket_data = '''id: ticket/new
-Queue: {queue}
-Requestor: matt.streatfield@sol1.com.au
-Subject: TEST TICKET - Matt testing RT integration
-Text: This is a test ticket'''.format(queue="icinga")
+
+    ticket_data = "id: ticket/new\n"
+    ticket_data += "Queue: {queue}\n".format(queue="icinga")
+    ticket_data += "Requestor: matt.streatfield@sol1.com.au\n"
+    ticket_data += "Subject: TEST TICKET - Matt testing RT integration\n"
+    ticket_data += "Text: This is a test ticket"
 
     res = SESSION.post(
         "https://rt.sol1.net/REST/1.0/ticket/new",
         data={"content": ticket_data},
         headers=dict(Referer="https://rt.sol1.net"))
 
-    ID = RT_REGEX.search(res.text).group(2)
-
-    return ID
+    return RT_REGEX.search(res.text).group(2)
 
 def add_comment(ticket_id, comment_text):
     '''Add a comment to an existing ticket'''
-    ticket_data = '''id: {id}
-Action: comment
-Text: {text}'''.format(id=ticket_id, text=comment_text)
 
-    res = SESSION.post(
+    ticket_data = "id: {id}".format(id=ticket_id)
+    ticket_data += "Action: comment"
+    ticket_data += "Text: {text}".format(text=comment_text)
+
+    SESSION.post(
         "https://rt.sol1.net/REST/1.0/ticket/{id}/comment".format(id=ticket_id),
         data={"content": ticket_data},
         headers=dict(Referer="https://rt.sol1.net"))
 
-    print(res.text)
     return
 
 authenticate_rt(USERNAME, PASSWORD)
