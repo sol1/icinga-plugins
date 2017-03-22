@@ -1,20 +1,25 @@
 #!/usr/bin/python3
 '''Icinga2 plugin to create and track RT tickets when services and hosts go critical'''
 
-import requests
 import re
+import requests
+import json
 
 #load auth data from file
-FILE = open('rt.auth', 'r')
+RT_AUTH_FILE = open('rt.auth', 'r')
+ICINGA_AUTH_FILE = open('icinga.auth', 'r')
 
 USER_REGEX = re.compile(r'(\")(\w+)(\")')
 RT_REGEX = re.compile(r'(# Ticket )(\w+)( created)')
 
-userline = FILE.readline()
-passline = FILE.readline()
+userline = RT_AUTH_FILE.readline()
+passline = RT_AUTH_FILE.readline()
 
-USERNAME = USER_REGEX.search(userline).group(2)
-PASSWORD = USER_REGEX.search(passline).group(2)
+RT_DEETS = {}
+RT_DEETS['user'] = USER_REGEX.search(userline).group(2)
+RT_DEETS['pass'] = USER_REGEX.search(passline).group(2)
+
+ICINGA_DEETS = json.loads(ICINGA_AUTH_FILE.readline())
 
 SESSION = requests.session()
 
@@ -23,7 +28,7 @@ def authenticate_rt(username, password):
 
     SESSION.post("https://rt.sol1.net", data={"user": username, "pass": password})
 
-def create_ticket():
+def create_ticket_rt():
     '''Creates a ticket in RT and returns the ticket ID'''
 
     ticket_data = "id: ticket/new\n"
@@ -39,11 +44,11 @@ def create_ticket():
 
     return RT_REGEX.search(res.text).group(2)
 
-def add_comment(ticket_id, comment_text):
-    '''Add a comment to an existing ticket'''
+def add_comment_rt(ticket_id, comment_text):
+    '''Add a comment to an existing RT ticket'''
 
-    ticket_data = "id: {id}".format(id=ticket_id)
-    ticket_data += "Action: comment"
+    ticket_data = "id: {id}\n".format(id=ticket_id)
+    ticket_data += "Action: comment\n"
     ticket_data += "Text: {text}".format(text=comment_text)
 
     SESSION.post(
@@ -53,6 +58,25 @@ def add_comment(ticket_id, comment_text):
 
     return
 
-authenticate_rt(USERNAME, PASSWORD)
-RT_ID = create_ticket()
-add_comment(RT_ID, "This is a test comment!")
+def get_comments_icinga(username, password, hostname):
+    '''Get all icinga comments associated with a hostname'''
+
+    #probs move filters into request body
+    res = SESSION.get(
+        "https://subview.hq.sol1.net:5665/v1/objects/comments?filter=host.name==\"{hostname}\"&filter=comment.author==\"notifyrt\"".format(hostname=hostname),
+        auth=(username, password),
+        verify=False,
+        headers=dict(Referer="https://subview.hq.sol1.net:5665"))
+
+    print(res.text)
+    return
+
+get_comments_icinga(ICINGA_DEETS['user'], ICINGA_DEETS['pass'], "secret ipmi")
+
+# print("running")
+
+# authenticate_rt(RT_DEETS['user'], RT_DEETS['pass'])
+# RT_ID = create_ticket_rt()
+# add_comment_rt(RT_ID, "This is a test comment!")
+
+# print("done")
