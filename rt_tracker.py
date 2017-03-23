@@ -2,8 +2,11 @@
 '''Icinga2 plugin to create and track RT tickets when services and hosts go critical'''
 
 import re
-import requests
 import json
+
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning) #Disable unverified SSL warning
 
 #load auth data from file
 RT_AUTH_FILE = open('rt.auth', 'r')
@@ -11,13 +14,11 @@ ICINGA_AUTH_FILE = open('icinga.auth', 'r')
 
 USER_REGEX = re.compile(r'(\")(\w+)(\")')
 RT_REGEX = re.compile(r'(# Ticket )(\w+)( created)')
-
-userline = RT_AUTH_FILE.readline()
-passline = RT_AUTH_FILE.readline()
+TICKETID_REGEX = re.compile(r'(#)([0-9]+)(\])')
 
 RT_DEETS = {}
-RT_DEETS['user'] = USER_REGEX.search(userline).group(2)
-RT_DEETS['pass'] = USER_REGEX.search(passline).group(2)
+RT_DEETS['user'] = USER_REGEX.search(RT_AUTH_FILE.readline()).group(2)
+RT_DEETS['pass'] = USER_REGEX.search(RT_AUTH_FILE.readline()).group(2)
 
 ICINGA_DEETS = json.loads(ICINGA_AUTH_FILE.readline())
 
@@ -58,25 +59,76 @@ def add_comment_rt(ticket_id, comment_text):
 
     return
 
-def get_comments_icinga(username, password, hostname):
+def get_comments_icinga(username, password, hostname, servicename):
     '''Get all icinga comments associated with a hostname'''
+
+    filters = 'host.name=="{hostname}"'.format(hostname=hostname)
+    filters += '&&service.name=="{servicename}"'.format(servicename=servicename)
+    filters += '&&comment.author=="notifyrt"'.format(servicename=servicename)
+
+    body = {'filter': filters}
 
     #probs move filters into request body
     res = SESSION.get(
-        "https://subview.hq.sol1.net:5665/v1/objects/comments?filter=host.name==\"{hostname}\"&filter=comment.author==\"notifyrt\"".format(hostname=hostname),
+        "https://subview.hq.sol1.net:5665/v1/objects/comments",
         auth=(username, password),
         verify=False,
-        headers=dict(Referer="https://subview.hq.sol1.net:5665"))
+        json=body)
 
-    print(res.text)
+    result = json.loads(res.text)['results']
+    if len(result) < 1:
+        return None
+    else:
+        #extract id from comment
+        ticket_id = TICKETID_REGEX.search(result[0]['attrs']['text']).group(2)
+        return ticket_id
+
+def add_comment_icinga(username, password, hostname, servicename, comment_text):
+    '''Create comment on an icinga service or host'''
+
+    filters = 'host.name=="{}"'.format(hostname)
+    object_type = 'Host'
+
+    if servicename != "":
+        object_type = 'Service'
+        filters += '&&service.name=="{}"'.format(servicename)
+
+    body = {
+        'filter': filters,
+        "type":object_type,
+        "author":username,
+        "comment":comment_text}
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8'}
+
+    SESSION.post(
+        "https://subview.hq.sol1.net:5665/v1/actions/add-comment",
+        auth=(username, password),
+        verify=False,
+        headers=headers,
+        json=body)
+
     return
 
-get_comments_icinga(ICINGA_DEETS['user'], ICINGA_DEETS['pass'], "secret ipmi")
+authenticate_rt(RT_DEETS['user'], RT_DEETS['pass'])
 
-# print("running")
+results = get_comments_icinga(ICINGA_DEETS['user'], ICINGA_DEETS['pass'], "secret ipmi", "")
+if results is None:
+    print("Create RT ticket and comment ID")
+    RT_ID = create_ticket_rt()
+    add_comment_icinga(
+        ICINGA_DEETS['user'], 
+        ICINGA_DEETS['pass'],
+        "secret ipmi",
+        "",
+        '<a href="https://rt.sol1.net/Ticket/Display.html?id={}">[sol1 #{}]</a> - ticket created in RT'.format(str(RT_ID), str(RT_ID)))
+else:
+    print("Get comment and comment on RT")
+    add_comment_rt(results, "ticket existed, commenting")
+    print(results)
 
-# authenticate_rt(RT_DEETS['user'], RT_DEETS['pass'])
-# RT_ID = create_ticket_rt()
 # add_comment_rt(RT_ID, "This is a test comment!")
 
 # print("done")
