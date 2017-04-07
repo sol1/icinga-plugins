@@ -2,9 +2,11 @@
 # check if corvus has ingested anything from voipmonitor recently
 
 #in seconds
+SQL_HOST_IP=$1
+SQL_USER=$2
 MAXAGE=$3
 
-TIMESINCE=`mysql voipmonitor -BN -h $1 -u $2 -e 'select cast((now() - max(created_at)) AS SIGNED) from calls;'`
+TIMESINCE=`mysql voipmonitor -BN -h $SQL_HOST_IP -u $SQL_USER -e 'select cast((now() - max(created_at)) AS SIGNED) from calls;'`
 
 RES=$(($MAXAGE < $TIMESINCE))
 
