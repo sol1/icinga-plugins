@@ -20,14 +20,16 @@ func modtime(path string) (time time.Time, err error) {
 
 func main() {
 	var path string;
+	var ret int;
 	path = os.Args[1];
 
+	ret = 0;
 	mt, err := modtime(path);
 	if (err != nil) {
-		os.Exit(1);
+		ret = 1
 	} else {
 		fmt.Print(mt);
 	}
-	fmt.Println("I'm a noob lol!")
 
+	os.Exit(ret);
 };
