@@ -1,0 +1,42 @@
+.Dd $Mdocdate$
+.Dt CHECK_CLOCK 1
+.Os
+.Sh NAME
+.Nm check_clock
+.Nd compare local and remote time for Nagios/Icinga
+.Sh SYNOPSIS
+.Nm 
+.Op Fl w Ar seconds
+.Op Fl c Ar seconds
+.Ar hostname
+.Sh DESCRIPTION
+.Nm
+compares the times reported by the local system clock and an NTP server.
+It then writes any offset and a short description to standard output.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl w
+Specify the warning threshold. The default is 1 second. 
+.It Fl c
+Specify the critical threshold. The default is 2 seconds. 
+.Sh EXIT STATUS
+.Nm
+exits 0 when local and remote time difference is within threshold, and > 0 if
+time difference exceeds threshold, or if an error occurs. The exit codes
+match Nagios/Icinga statuses.
+.Sh EXAMPLES
+Compare system time against a remote NTP server:
+.Pp
+.Dl $ check_clock ntp.on.net 
+.Pp
+Only exit with error if the local clock differs by 4.5 seconds. 
+.Pp
+.Dl $ check_clock -c 4.5 utcnist.colorado.edu
+.Pp
+.Sh AUTHORS
+.Nm
+uses a simple, sane NTP Go library written by Brett Vickers.
+.Sh SEE ALSO
+.Xr date 1 ,
+.Xr icinga2 1
