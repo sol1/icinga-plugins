@@ -31,6 +31,10 @@ func main() {
 		fmt.Println(err)
 	}
 
+	/*
+	 * Compare the file count against threshold values and set icinga2(8)
+	 * compatible exit codes accordingly.
+	 */
 	count := len(fileinfo)
 	ret = 3
 	if count >= *crit {
