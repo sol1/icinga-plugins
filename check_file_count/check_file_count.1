@@ -11,10 +11,50 @@
 .Ar path
 .Sh DESCRIPTION
 .Nm
-does stuff.
+counts the number of files in the given
+.Ar path
+and compares this to the
+.Ar num
+values.
+If the count is higher than any threshold counts,
+.Nm
+exits with
+.Xr icinga2 8
+and
+.Xr nagios 8
+compatible exit codes to indicate status of the monitored service.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl w Ar num
+Set number
+.Ar num
+files to signal a warning status
+.Pq default 8 .
+.It Fl c Ar num
+Set number
+.Ar num
+files to signal a critical status
+.Pq default 16 .
+.El
+.Sh EXAMPLES
+Check the number of queued files is not too high:
+.Pp
+.Dl $ check_file_count /var/spool/programqueue
+.Pp
+Check log rotation is working correctly; check the number of log files
+.Pp
+.Dl $ check_file_count -w 50 -c 75 /var/log
 .Sh FILES
-.Pa icinga2.conf
+.Bl -tag -width Ds
+.It Pa icinga2.conf
 Example
 .Xr icinga2 8
 configuration implementing
-.Nm
+.Nm .
+This file is distributed with the source code, and installed in
+.Pa /usr/local/share/examples/check_file_count
+on Unix-like systems.
+.Sh SEE ALSO
+.Xr icinga2 8
+.Xr icinga2.conf 5
