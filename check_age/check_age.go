@@ -15,7 +15,6 @@ func modtime(path string) (time time.Time, err error) {
 		fmt.Fprintf(os.Stderr, "Error opening %s\n", path);
 		return time, err;
 	} else {
-		fmt.Fprintf(os.Stderr, "Successful stat() on %s\n", path);
 		return fi.ModTime(), nil;
 	}
 }
