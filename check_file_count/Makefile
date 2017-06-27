@@ -8,14 +8,7 @@ ${PROG}: ${SRCS}
 
 .PHONY: test clean
 test: build
-	mkdir -p $@
-	@echo "test file 1" > $@/f1
-	@echo "Testing warning threshold..."
-	./${PROG} -w 1 -c 2 $@
-	@echo "test file 2" > $@/f2
-	@echo "Testing critical threshold..."
-	./${PROG} -w 1 -c 2 $@
+	sh regress/test.sh
 
 clean:
 	rm -f ${PROG}
-	rm -rf test
