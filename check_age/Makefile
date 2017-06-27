@@ -8,9 +8,14 @@ build: ${PROG}
 install: build
 	install -m 555 -o root -g wheel ${PROG} ${PREFIX}/bin
 
-${PROG}: ${PROG}.go
-	go build -o $@
+${PROG}: ${SRCS}
+	go build -o $@ ${SRCS}
 
-.PHONY: clean
+.PHONY: test clean
+test: build
+	sh regress/test.sh
+
 clean:
 	rm -f ${PROG}
+	rm -f regress/oldfile
+	rm -f regress/newfile
