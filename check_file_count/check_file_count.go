@@ -36,7 +36,7 @@ func main() {
 	 * compatible exit codes accordingly.
 	 */
 	count := len(fileinfo)
-	ret = 3
+	ret = UNKNOWN
 	if count >= *crit {
 		ret = CRITICAL
 	} else if count >= *warn {
