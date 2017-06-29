@@ -5,26 +5,21 @@ PKG=sol1-icingautil
 
 SUBDIR= check_age check_ardomedf check_clock check_file_count
 
-# Make the default target for each utility.
+# Make the default target (the first target defined in each child Makefile) for
+# each utility.
 build:
 	for d in ${SUBDIR}; do \
 		$(MAKE) -C $$d; \
 	done
 
 # Create directory hierarchy expected by installation and packaging routines.
-pkg:
+pkg pkg/${BINDIR} pkg/${MANDIR} pkg/windows:
 	mkdir -p $@
 
-pkg/${BINDIR} pkg/${MANDIR}:
-	mkdir -p $@
-
-pkg/windows:
-	mkdir -p $@
-
-# Linux/unix binaries are put into their installation directory on mirrored on
-# the local filesystem, to be packaged into rpm and deb files by fpm(1).
-# Windows exe files are installed into a flat directory and compressed into a
-# zip archive.
+# Linux/unix binaries are 'installed' into their installation directory
+# mirrored on the local filesystem, then packaged into rpm and deb files by
+# fpm(1).  Windows exe files are installed into a flat directory and compressed
+# into a zip archive.
 ifeq (GOOS, windows)
 install:
 	@install -m 555 ${PROG}.exe ${PREFIX}/windows
