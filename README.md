@@ -21,5 +21,4 @@ If you then make changes locally, here's how to publish them:
 
 ## TODO
 
- * Don't duplicate plugins in here that you get with the usual nagios-plugins style packages or that are otherwise available elsewhere (we want upstream upgrades after all)
  * As we write more plugins, include them as a submodule only, so this repo becomes more like a "meta" or dependency package.
