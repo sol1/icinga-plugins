@@ -42,9 +42,9 @@ ${PKG}.deb: pkg/${BINDIR} pkg/${MANDIR} build
 		echo "installing $$s..."; \
 		$(MAKE) -C $$s install; \
 	done
-	# Manually remove old package before rebuilding;
-	# fpm will not overwrite packages.
-	@rm $@
+	@# Manually remove old package before rebuilding;
+	@# fpm will not overwrite packages.
+	@rm -f $@
 	fpm -n ${PKG} -p $@ -s dir -t deb -C pkg
 
 ${PKG}.rpm: pkg/${BINDIR} pkg/${MANDIR} build
@@ -54,7 +54,7 @@ ${PKG}.rpm: pkg/${BINDIR} pkg/${MANDIR} build
 	done
 	@# Manually remove old package before rebuilding;
 	@# fpm will not overwrite packages.
-	@rm $@
+	@rm -f $@
 	fpm -n ${PKG} -p $@ -s dir -t rpm -C pkg
 
 ${PKG}.zip: build
