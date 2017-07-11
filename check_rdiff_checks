@@ -2,7 +2,7 @@
 #
 # Check everything on a backup server has a backup check
 # based on /backupdir/customer/backup dirctory format
-# Prerequsites: user and ssh keys on backup server 
+# Prerequisites: user and ssh keys on backup server 
 # Usage: command server.domain "/dir/dir" "cust1 cust2/dir1"
 # 	 - exclude is optional
 
@@ -10,8 +10,8 @@ function checkParam() {
 	local name="$1"
 	local param="$2"
 
-	if [ -z "$param" ] ; then
-			MESSAGE="${MESSAGE} $name"
+	if [ -z "$param" ]; then
+		MESSAGE="${MESSAGE} $name"
 	fi
 }
 
@@ -32,26 +32,26 @@ LOGIN_USER="nagioschecker"
 if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 	backupServer="$1"
 	backupRoot="$2"
-	depth="$3"
+	depth="$3" # directory depth to look for rdiff-backup-data folders
 	exclude=`echo "$4" | sed -e "s/,/ /g"`
 
-	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then		# Can we login
+	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then
 
 		# Log in to a backup server using the backup user and get list of backup dirs
-		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d" | sed -e "s:${backupRoot}/::g" | sort`
-		if [ $? -eq 0 ] ; then
+		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d -name rdiff-backup-data" | sed -e "s:${backupRoot}/::" | sed -e "s:/rdiff-backup-data::" | sort`
+
+		if [ $? -eq 0 ]; then
 			MESSAGE=""
 			for dir in ${backupDirs}; do 
 				excluded=false
-				for part in $(seq 1 $depth) ; do 	# test each part of a path for exclusions
+				for part in $(seq 1 $depth) ; do # test each part of a path for exclusions
 					if echo " ${exclude}" 2>/dev/null | grep -q -w `echo " $dir" | cut -f1-$part -d"/"` ; then	# Skip excluded name
 						excluded=true	
 					fi 
 				done
 
-				if [ $excluded = false ] ; then
-					# This is the check for you rdiff config and need to be setup for how the config is setup
-					if ! grep "vars.rdiffs" /etc/icinga2/conf.d/* 2>/dev/null | grep -q "${dir}" ; then	# Critical on missing backup checks for host
+				if [ $excluded = false ]; then
+					if ! grep "vars.rdiffs" /etc/icinga2/conf.d/* 2>/dev/null | grep -q "${dir}" ; then # Critical on missing backup checks for host
 						MESSAGE="${MESSAGE} ${dir}"
 						exitCode=$STATE_CRITICAL
 					fi
@@ -69,7 +69,7 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 				MESSAGE="$MESSAGE ($exclude excluded)"
 			fi
 		else
-				MESSAGE="Error finding backups directories"
+			MESSAGE="Error finding backups directories"
 			exitCode=$STATE_CRITICAL
 		fi
 	else
