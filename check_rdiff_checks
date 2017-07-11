@@ -7,18 +7,17 @@
 # 	 - exclude is optional
 
 function checkParam() {
- local name="$1"
- local param="$2"
+	local name="$1"
+	local param="$2"
 
-        if [ -z "$param" ] ; then
-                MESSAGE="${MESSAGE} $name"
-        fi
+	if [ -z "$param" ] ; then
+			MESSAGE="${MESSAGE} $name"
+	fi
 }
 
 function trimMessage() {
 	MESSAGE="$(echo -e "${MESSAGE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' )"
 }
-
 
 STATE_OK=0
 STATE_WARNING=1
@@ -38,9 +37,9 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 
 	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then		# Can we login
 
-                # Login a backup server using the backup user and get list of backup dirs
+		# Log in to a backup server using the backup user and get list of backup dirs
 		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d" | sed -e "s:${backupRoot}/::g" | sort`
-		if  [ $? -eq 0 ] ; then
+		if [ $? -eq 0 ] ; then
 			MESSAGE=""
 			for dir in ${backupDirs}; do 
 				excluded=false
@@ -70,33 +69,33 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 				MESSAGE="$MESSAGE ($exclude excluded)"
 			fi
 		else
-	    		MESSAGE="Error finding backups directories"
+				MESSAGE="Error finding backups directories"
 			exitCode=$STATE_CRITICAL
 		fi
 	else
-	    MESSAGE="Unable to connect to $backupServer"
-	    exitCode=$STATE_WARNING
+		MESSAGE="Unable to connect to $backupServer"
+		exitCode=$STATE_WARNING
 	fi
 else
 	exitCode=$STATE_UNKNOWN
 	checkParam "server" "$1"
 	checkParam "directory" "$1"
 	checkParam "depth" "$1"
- 
-    	trimMessage
-    	MESSAGE="Missing paramaters ${MESSAGE} ($@)"
+
+	trimMessage
+	MESSAGE="Missing paramaters ${MESSAGE} ($@)"
 fi
 
 trimMessage
 
 if [ $exitCode -eq $STATE_UNKNOWN ]; then
-    echo "UNKNOWN - $MESSAGE"
+	echo "UNKNOWN - $MESSAGE"
 elif [ $exitCode -eq $STATE_CRITICAL ]; then
-    echo "CRITICAL - $MESSAGE"
+	echo "CRITICAL - $MESSAGE"
 elif [ $exitCode -eq $STATE_WARNING ]; then
-    echo "WARNING - $MESSAGE"
+	echo "WARNING - $MESSAGE"
 elif [ $exitCode -eq $STATE_OK ]; then
-    echo "OK - $MESSAGE"
+	echo "OK - $MESSAGE"
 fi
 
 exit $exitCode
