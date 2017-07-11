@@ -1,0 +1,28 @@
+.Dd $Mdocdate$
+.Dt CHECK_AGE 1
+.Os
+.Sh NAME
+.Nm check_age
+.Nd check the last modified date of a file
+.Sh SYNOPSIS
+.Nm 
+.Op Fl w Ar seconds
+.Op Fl c Ar seconds
+.Ar file
+.Sh DESCRIPTION
+.Nm
+compares the last modified time of a file to the present time. 
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl w
+Set the warning threshold. The default is
+.It Fl c
+Set the critical threshold. The default is
+.Sh EXIT STATUS
+.Nm
+exits
+.Sh EXAMPLES
+.Sh SEE ALSO
+.Xr date 1 ,
+.Xr icinga2 1
