@@ -38,7 +38,7 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 	if [ `ssh -q ${LOGIN_USER}@${backupServer} exit ; echo $?` -eq 0 ]; then
 
 		# Log in to a backup server using the backup user and get list of backup dirs
-		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d -name rdiff-backup-data" | sed -e "s:${backupRoot}/::" | sed -e "s:/rdiff-backup-data::" | sort`
+		backupDirs=`ssh ${LOGIN_USER}@${backupServer} "find ${backupRoot} -mindepth $depth -maxdepth $depth -type d -name rdiff-backup-data 2> /dev/null" | sed -e "s:${backupRoot}/::" | sed -e "s:/rdiff-backup-data::" | sort`
 
 		if [ $? -eq 0 ]; then
 			MESSAGE=""
@@ -46,7 +46,7 @@ if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ]; then
 				excluded=false
 				for part in $(seq 1 $depth) ; do # test each part of a path for exclusions
 					if echo " ${exclude}" 2>/dev/null | grep -q -w `echo " $dir" | cut -f1-$part -d"/"` ; then	# Skip excluded name
-						excluded=true	
+						excluded=true
 					fi 
 				done
 
