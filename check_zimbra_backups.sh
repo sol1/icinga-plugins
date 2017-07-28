@@ -36,6 +36,7 @@ function checkfileage () {
 	local warn="$2"
 	local crit="$3"
 	local message=""
+	local state=3
 	
 	# If we have a remote target use it
 	if [ -n "$4" ] ; then
@@ -44,10 +45,11 @@ function checkfileage () {
 		message=`/usr/lib/nagios/plugins/check_file_age -w $warn -c $crit -f "$file"`
 	fi
 
+	state="$?"
 
-	if [ "$?" != "0" ] ; then
+	if [ "$state" != "0" ] ; then
 		echo "$message"
-		exit $?
+		exit $state
 	fi
 }
 
