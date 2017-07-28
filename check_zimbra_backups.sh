@@ -26,7 +26,7 @@ function trimMessage() {
 
 function checkexitstatus () {
         if [ "$?" != "0" ] ; then 
-		echo "UNKNOWN - Failed to check server $SERVER"
+		echo "UNKNOWN - Failed to check server $hostname"
                 exit $STATE_UNKNOWN
         fi
 }
@@ -61,6 +61,7 @@ MESSAGE=""
 
 if [ -n "$1" ] ; then
 	SERVER=$1
+	hostname="$SERVER"
 
 	BACKUP_TXT="/tmp/$SERVER-backups.txt"
 	STATUS_TXT="/tmp/$SERVER-status.txt"
@@ -70,6 +71,7 @@ if [ -n "$1" ] ; then
 
 
 	if [ "$SERVER" == "localhost" ] ; then
+		hostname="`hostname` ($SERVER)"
 		su zimbra -l -c "zmbackupquery -v $SERVER |grep @ | cut -d ' ' -f 3- | cut -d ':' -f 1| sort |uniq > ${BACKUP_TXT}"
 		checkexitstatus
 		checkfileage ${BACKUP_TXT} 60 60
@@ -91,10 +93,10 @@ if [ -n "$1" ] ; then
 
 
 	if [ $(wc -l ${STATUS_TXT} |cut -f 1 -d " ") -gt 0 ] ; then
-		MESSAGE="$SERVER: $(wc -l ${STATUS_TXT} |cut -f 1 -d " ") accounts do not have a backup: `cat ${STATUS_TXT} | sed ':a;N;$!ba;s/\n/ /g'`"
+		MESSAGE="$hostname: $(wc -l ${STATUS_TXT} |cut -f 1 -d " ") accounts do not have a backup: `cat ${STATUS_TXT} | sed ':a;N;$!ba;s/\n/ /g'`"
 		exitCode=$STATE_CRITICAL
 	else
-		MESSAGE="$SERVER: all accounts have a backup"
+		MESSAGE="$hostname: all accounts have a backup"
 		exitCode=$STATE_OK
 	fi
 
