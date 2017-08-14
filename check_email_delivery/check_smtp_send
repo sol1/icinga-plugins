@@ -62,6 +62,13 @@ $ok = Getopt::Long::GetOptions(
 	"hires"=>\$time_hires,
 	);
 
+# HERE BE DRAGONS
+# TLS doesn't work so use ssl instead
+if($tls == 1) {
+        $tls = 0;
+        $ssl = 1;
+}
+
 if( $show_version ) {
 	print "$VERSION\n";
 	if( $verbose ) {
