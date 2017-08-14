@@ -3,7 +3,7 @@ BINDIR=usr/lib/nagios/plugins
 PREFIX=../pkg
 PKG=sol1-icingautil
 
-SUBDIR= check_age check_ardomedf check_clock check_file_count
+SUBDIR= check_age check_ardomedf check_clock check_file_count check_hadr
 
 # Make the default target (the first target defined in each child Makefile) for
 # each utility.
@@ -32,7 +32,7 @@ install:
 	fi
 endif
 
-${PKG}.deb: pkg/${BINDIR} pkg/${MANDIR} build
+${PKG}.deb: pkg build
 	@for s in ${SUBDIR}; do \
 		echo "installing $$s..."; \
 		$(MAKE) -C $$s install; \
@@ -42,7 +42,7 @@ ${PKG}.deb: pkg/${BINDIR} pkg/${MANDIR} build
 	@rm -f $@
 	fpm -n ${PKG} -p $@ -s dir -t deb -C pkg
 
-${PKG}.rpm: pkg/${BINDIR} pkg/${MANDIR} build
+${PKG}.rpm: pkg build
 	@for s in ${SUBDIR}; do \
 		echo "installing $$s..."; \
 		$(MAKE) -C $$s install; \
