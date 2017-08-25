@@ -11,6 +11,19 @@ const CRITICAL int = 2
 const WARNING int = 1
 const OK int = 0
 
+func usage() {
+	fmt.Printf("usage: check_file_count [-w count] [-c count] path\n")
+}
+
+// listpath takes a slice of FileInfos returned from os.Readdir, and prints a
+// listing of the file names in the slice.
+func ls(fi []os.FileInfo) {
+	for i:= 0; i < len(fi); i++ {
+		filename := fi[i].Name()
+		fmt.Printf("%s\n", filename)
+	}
+}
+
 func main() {
 	var dir string
 	var warn *int
@@ -22,13 +35,18 @@ func main() {
 	flag.Parse()
 
 	dir = flag.Arg(0)
+	if dir == "" {
+		usage()
+		os.Exit(255)
+	}
+
 	f, err := os.Open(dir)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Error opening %s: %v\n", dir, err)
 	}
 	fileinfo, err := f.Readdir(0)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "Error reading directory: %v", err)
 	}
 
 	/*
@@ -46,5 +64,6 @@ func main() {
 	}
 
 	fmt.Printf("%d files present in %s\n", count, dir)
+	ls(fileinfo)
 	os.Exit(ret)
 }
