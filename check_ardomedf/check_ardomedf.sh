@@ -34,7 +34,7 @@ if [ "$df" -lt "$crit" ]; then
 elif [ "$df" -lt "$warn" ]; then
         echo "WARNING - Ardome reports $df bytes free"
         exit 1
-if [ "$df" -gt "$warn" ]; then
+elif [ "$df" -gt "$warn" ]; then
         echo "OK - Ardome reports $df bytes free"
         exit 0
 else
