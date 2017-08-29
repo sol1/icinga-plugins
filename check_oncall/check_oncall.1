@@ -1,0 +1,49 @@
+.Dd $Mdocdate: 24 November 2016 $
+.Dt CHECK_ONCALL 1
+.Os
+.Sh NAME
+.Nm check_oncall
+.Nd Nagios-compatible plugin to check on-call status in OpsGenie 
+.Sh SYNOPSIS
+.Nm check_oncall
+.Op Fl k Ar key
+.Op Fl s Ar name
+.Sh DESCRIPTION
+.Nm 
+is a plugin for use in
+.Xr icinga2 1
+or 
+.Xr nagios 1 Ns .
+The options are as folows:
+.Bl -tag -width Ds
+.It Fl k Ar key
+Specifies the API key to use to authenticate with the OpsGenie API. Required.
+.It Fl s Ar name
+Specifies the name of the schedule to query. The name must be in the 
+form defined in OpsGenie. Required.
+
+.Sh EXIT STATUS
+The
+.Nm 
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It 0
+A person is on call.
+.It 1
+Nobody is on call.
+.It >1
+An error occurred.
+.El
+.Sh EXAMPLES
+To check if someone is on call for the
+.Sq engineering
+schedule:
+.Pp
+.Dl $ check_oncall -k a1b2c3d4e5 -s engineering_schedule
+.Sh AUTHORS
+The 
+.Nm
+tool was written by 
+.An Oliver Lowe Aq Mt oliver.lowe@sol1.com.au 
+for Fox Sports Australia.

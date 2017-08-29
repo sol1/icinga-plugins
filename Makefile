@@ -1,72 +1,51 @@
-MANDIR=usr/local/share/man/man1
-BINDIR=usr/lib/nagios/plugins
-PREFIX=../pkg
-PKG=sol1-icingautil
+MANDIR= usr/local/share/man/man1
+BINDIR= usr/lib/nagios/plugins
+PREFIX?= ${.CURDIR}
 
 SUBDIR= check_age check_ardomedf check_clock check_file_count check_hadr
 
-# Make the default target (the first target defined in each child Makefile) for
-# each utility.
-build:
-	for d in ${SUBDIR}; do \
-		$(MAKE) -C $$d; \
-	done
+# Include the below programs in the build.
+PROGS=  check_age/check_age check_ardomedf/check_ardomedf \
+	check_clock/check_clock \
+	check_file_count/check_file_count check_hadr/check_hadr \
+	check_oncall/check_oncall
 
-# Create directory hierarchy expected by installation and packaging routines.
-pkg pkg/${BINDIR} pkg/${MANDIR} pkg/windows:
+build: ${PROGS}
+
+${BINDIR} ${MANDIR}:
 	mkdir -p $@
 
-# Linux/unix binaries are 'installed' into their installation directory
-# mirrored on the local filesystem, then packaged into rpm and deb files by
-# fpm(1).  Windows exe files are installed into a flat directory and compressed
-# into a zip archive.
-ifeq (GOOS, windows)
-install:
-	@install -m 555 ${PROG}.exe ${PREFIX}/windows
-else
-install: 
-	@install -m 555 ${PROG} ${PREFIX}/${BINDIR}
-	# Install manpages, if any.
-	@if test -f ${PROG}.1; then \
-		install -m 444 ${PROG}.1 ${PREFIX}/${MANDIR}; \
-	fi
-endif
+# Set generic rules to create a plugin 'binary' without a file extension for
+# each language.
+.SUFFIXES: .go .pl .sh
+.go:
+	@echo "==> ${@F}"
+	go build -o $@ $<
 
-${PKG}.deb: pkg build
-	@for s in ${SUBDIR}; do \
-		echo "installing $$s..."; \
-		$(MAKE) -C $$s install; \
+.sh:
+	@echo "==> ${@F}"
+	rm -f $@
+	@# Check shell for simple syntax errors
+	sh -n $<
+	cp $< $@
+
+.pl:
+	@echo "==> ${@F}"
+	rm -f $@
+	cp $< $@
+
+.PHONY: clean install
+clean:
+	rm -f ${PROGS}
+	rm -rf ${PREFIX}/${BINDIR}
+	rm -rf ${PREFIX}/${MANDIR}
+	rm -rf usr
+
+install: build ${BINDIR} ${MANDIR}
+	@echo "installing to ${PREFIX}/${BINDIR}"
+	for p in ${PROGS}; do \
+		install -m 555 $$p ${PREFIX}/${BINDIR}; \
 	done
-	@# Manually remove old package before rebuilding;
-	@# fpm will not overwrite packages.
-	@rm -f $@
-	fpm -n ${PKG} -p $@ -s dir -t deb -C pkg
 
-${PKG}.rpm: pkg build
-	@for s in ${SUBDIR}; do \
-		echo "installing $$s..."; \
-		$(MAKE) -C $$s install; \
-	done
-	@# Manually remove old package before rebuilding;
-	@# fpm will not overwrite packages.
-	@rm -f $@
-	fpm -n ${PKG} -p $@ -s dir -t rpm -C pkg
-
-${PKG}.zip: build
-
-# Remove temporary and built files from the repo root and each utility
-# directory.
-.PHONY: clean cleanall
-clean: cleanall
-	rm -rf pkg
-	rm -f *.deb
-	rm -f *.rpm
-	rm -f ${PROG}
-	rm -f ${PROG}.exe
-
-cleanall:
-	@for d in ${SUBDIR}; do \
-		echo "Removing build of $$d..."; \
-		rm -f $$d/$$d; \
-		rm -f $$d/$$d.exe; \
-	done
+# Exceptions to the standard build recipes are included below.
+include check_clock/Makefile
