@@ -51,7 +51,7 @@ ${PREFIX}/icinga-plugins.tar.gz: ${PREFIX}/icinga-plugins
 .PHONY: build all clean cleanall dist install
 clean:
 	rm -f ${PROG}
-	@if [ "${PROG}" == "" ]; then \
+	@if [ "${PROG}" = "" ]; then \
 		for entry in ${SUBDIR}; do \
 			echo "===> $$entry"; \
 			make -C $$entry clean; \
