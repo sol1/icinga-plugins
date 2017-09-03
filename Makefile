@@ -1,51 +1,75 @@
-MANDIR= usr/local/share/man/man1
-BINDIR= usr/lib/nagios/plugins
-PREFIX?= ${.CURDIR}
+PREFIX?= ${.CURDIR}/build
+MANDIR= ${PREFIX}/usr/local/share/man/man1
+BINDIR= ${PREFIX}/usr/lib/nagios/plugins
 
-SUBDIR= check_age check_ardomedf check_clock check_file_count check_hadr
+SUBDIR= check_age check_ardomedf check_clock check_file_count check_hadr \
+	check_oncall
 
-# Include the below programs in the build.
-PROGS=  check_age/check_age check_ardomedf/check_ardomedf \
-	check_clock/check_clock \
-	check_file_count/check_file_count check_hadr/check_hadr \
-	check_oncall/check_oncall
+build: ${PROG}
 
-build: ${PROGS}
+all:
+	@for dir in ${SUBDIR}; do \
+		echo "===> $$dir"; \
+		make -C $$dir build; \
+	done
 
-${BINDIR} ${MANDIR}:
-	mkdir -p $@
+${SUBDIR}::
+	@if test -d $@; then \
+		echo "===> $@"; \
+		exec make -C $@ build; \
+	fi
+
+${PROG}:: ${SRCS}
 
 # Set generic rules to create a plugin 'binary' without a file extension for
 # each language.
 .SUFFIXES: .go .pl .sh
 .go:
-	@echo "==> ${@F}"
-	go build -o $@ $<
+	go build -o $@ $>
 
 .sh:
-	@echo "==> ${@F}"
 	rm -f $@
-	@# Check shell for simple syntax errors
+	@# Check for simple shell syntax errors
 	sh -n $<
 	cp $< $@
 
 .pl:
-	@echo "==> ${@F}"
 	rm -f $@
 	cp $< $@
 
-.PHONY: clean install
+${PREFIX} ${BINDIR} ${MANDIR}:
+	mkdir -p $@
+
+${PREFIX}/icinga-plugins: clean
+	mkdir -p $@
+	cp -R ${SUBDIR} $@
+	cp Makefile $@
+
+${PREFIX}/icinga-plugins.tar.gz: ${PREFIX}/icinga-plugins
+	tar -f $@ -C build -cvz icinga-plugins
+
+.PHONY: build all clean cleanall dist install
 clean:
-	rm -f ${PROGS}
-	rm -rf ${PREFIX}/${BINDIR}
-	rm -rf ${PREFIX}/${MANDIR}
-	rm -rf usr
+	rm -f ${PROG}
+	@if [ "${PROG}" == "" ]; then \
+		for entry in ${SUBDIR}; do \
+			echo "===> $$entry"; \
+			make -C ${.CURDIR}/$$entry clean; \
+		done; \
+		rm -rf build; \
+	fi
+		
 
-install: build ${BINDIR} ${MANDIR}
-	@echo "installing to ${PREFIX}/${BINDIR}"
-	for p in ${PROGS}; do \
-		install -m 555 $$p ${PREFIX}/${BINDIR}; \
+dist: ${PREFIX}/icinga-plugins.tar.gz
+
+install: all ${PREFIX} ${BINDIR} ${MANDIR}
+	@echo "Installing plugins to ${BINDIR}"
+	@echo "Installing man pages to ${MANDIR}"
+	@# Install the binary. If there is an associated manpage, install it
+	@# too.
+	for p in ${SUBDIR}; do \
+		install -m 555 $$p/$$p ${BINDIR}; \
+		if [ -f $$p/$$p.1 ]; then \
+		install -m 444 $$p/$$p.1 ${MANDIR}; \
+		fi; \
 	done
-
-# Exceptions to the standard build recipes are included below.
-include check_clock/Makefile

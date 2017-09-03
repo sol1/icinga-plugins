@@ -1,4 +1,4 @@
-check_clock_sources=check_clock/check_clock.go check_clock/ntp.go
-check_clock/check_clock: ${check_clock_sources}
-	go build -o $@ ${check_clock_sources}
+PROG= check_clock
+SRCS= check_clock.go ntp.go
 
+include ${.CURDIR}/../Makefile
