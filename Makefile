@@ -1,4 +1,4 @@
-PREFIX?= ${.CURDIR}/build
+PREFIX?= build
 MANDIR= ${PREFIX}/usr/local/share/man/man1
 BINDIR= ${PREFIX}/usr/lib/nagios/plugins
 
@@ -54,7 +54,7 @@ clean:
 	@if [ "${PROG}" == "" ]; then \
 		for entry in ${SUBDIR}; do \
 			echo "===> $$entry"; \
-			make -C ${.CURDIR}/$$entry clean; \
+			make -C $$entry clean; \
 		done; \
 		rm -rf build; \
 	fi

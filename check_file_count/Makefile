@@ -5,4 +5,4 @@ SRCS=${PROG}.go
 test:
 	sh regress/test.sh
 
-include ${.CURDIR}/../Makefile
+include ../Makefile
