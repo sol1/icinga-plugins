@@ -47,7 +47,7 @@ func main() {
 	expectedport := flag.Int("p", 0, "port number")
 	process := flag.String("n", "", "process name")
 	flag.Parse()
-	addr := os.Args[1]
+	addr := flag.Arg(0)
 
 	if *process != "" {
 		fmt.Printf("warning: the -n option is not yet implemented\n")
@@ -60,24 +60,29 @@ func main() {
 
 	status := UNKNOWN
 	if isconnected {
-		fmt.Printf("established socket with %s\n", addr)
-		/* We don't care about remote ports if the option isn't set. */
-		if expectedport == 0 {
-			status = OK
-			break
-		}
+		fmt.Printf("established socket with %s ", addr)
 		/* Check that the remote port of each socket is as expected. */
-		for i := 0; i <= len(sockets); i++ {
-			remoteport := sockets[i].RemotePort
-			if remoteport == expectedport {
+		for i := 0; i < len(sockets); i++ {
+			/* We don't care about remote ports if the option isn't set, so just return OK. */
+			if *expectedport == 0 {
 				status = OK
-				fmt.Printf("Socket uses expected port %d\n",
+				break
+			}
+			/* cast to int. Unknown why pkg netstat returns float64. */
+			remoteport := int(sockets[i].RemotePort)
+			if remoteport == *expectedport {
+				status = OK
+				fmt.Printf("using expected port %d\n",
 				    *expectedport)
-			} else if remoteport != expectedport {
+				break
+			} else if remoteport != *expectedport {
 				status = CRITICAL
-				fmt.Printf("Socket established with %s, ",
-				    "but using port %d (not %d)",
-				    addr, remoteport, *expectedport)
+				fmt.Printf("using unexpected port %d\n",
+				    *expectedport)
+			} else {
+				status = UNKNOWN
+				fmt.Printf("Cannot compare remote port with",
+				    "expected port\n")
 			}
 		}
 	} else if isconnected == false {
