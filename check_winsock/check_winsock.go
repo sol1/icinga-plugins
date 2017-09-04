@@ -35,22 +35,43 @@ func ProcStat(proc string) (running bool, err error) {
 }
 
 func main() {
+	var status int
+	var addr string
+
+
 	if len(os.Args) < 2 {
 		usage()
 		os.Exit(1)
 	}
-	/*
-	 * TODO(olly): Check if process is running using ProcStat(). If not,
-	 * then don't even worry about checking sockets.
-	 */
 
 	expectedport := flag.Int("p", 0, "port number")
 	process := flag.String("n", "", "process name")
 	flag.Parse()
-	addr := flag.Arg(0)
+	addr = flag.Arg(0)
+	if addr == "" {
+		/* Remote address is a required parameter. */
+		usage()
+		os.Exit(1)
+	}
 
+	/*
+	 * TODO(olly): Check if process is running using ProcStat(). If not,
+	 * then don't even worry about checking sockets.
+	 */
+	status = UNKNOWN
 	if *process != "" {
-		fmt.Printf("warning: the -n option is not yet implemented\n")
+		fmt.Printf("warning: the -n option is not implemented yet\n")
+		isrunning, err := ProcStat(*process)
+		if err != nil {
+			fmt.Fprintf(os.Stderr,
+			    "warning: Error querying process list: %v\n", err)
+		}
+		if isrunning {
+			fmt.Fprintf(os.Stderr, "%s is running\n", *process)
+		} else if isrunning == false {
+			fmt.Fprintf(os.Stderr,
+			    "warning: %s not running\n", *process)
+		}
 	}
 
 	isconnected, sockets, err := netstat.HasIPConnected(addr)
@@ -58,12 +79,14 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error on HasIPConnected(): %v\n", err)
 	}
 
-	status := UNKNOWN
 	if isconnected {
-		fmt.Printf("established socket with %s ", addr)
-		/* Check that the remote port of each socket is as expected. */
+		fmt.Printf("active connection with %s\n", addr)
+		/* Check that the remote port is as expected. */
 		for i := 0; i < len(sockets); i++ {
-			/* We don't care about remote ports if the option isn't set, so just return OK. */
+			/*
+			 * We don't care about remote ports if the option isn't
+			 * set, so just return OK.
+			 */
 			if *expectedport == 0 {
 				status = OK
 				break
@@ -72,13 +95,13 @@ func main() {
 			remoteport := int(sockets[i].RemotePort)
 			if remoteport == *expectedport {
 				status = OK
-				fmt.Printf("using expected port %d\n",
-				    *expectedport)
+				fmt.Printf("socket uses expected port: %d\n",
+				    remoteport)
 				break
 			} else if remoteport != *expectedport {
 				status = CRITICAL
-				fmt.Printf("using unexpected port %d\n",
-				    *expectedport)
+				fmt.Printf("socket uses unexpected port: %d\n",
+				    remoteport)
 			} else {
 				status = UNKNOWN
 				fmt.Printf("Cannot compare remote port with",
