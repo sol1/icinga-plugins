@@ -24,14 +24,14 @@ func usage() {
  * otherwise. Error is returned on unsuccessful listing of running processes.
  */
 func ProcStat(proc string) (running bool, err error) {
-	cmdstring := fmt.Sprintf("tasklist /fi \"imagename eq %s\"", proc)
-	cmd := exec.Command(cmdstring)
-	o, err := cmd.Output()
+	filter := fmt.Sprintf("imagename eq %s", proc)
+	cmd := exec.Command("tasklist", "-fi", filter)
+	o, err := cmd.CombinedOutput()
 	if err != nil {
 		return false, err
 	}
-	output := string(o[:len(o)])
-	return strings.Contains(proc, output), nil
+	output := string(o)
+	return strings.Contains(output, proc), nil
 }
 
 func main() {
