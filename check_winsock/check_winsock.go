@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"os/exec"
 	"fmt"
 	"bufio"
 	"strings"
@@ -16,6 +17,20 @@ const OK       int = 0
 
 func usage() {
 	fmt.Printf("usage: check_winsock [-p port] address\n")
+}
+
+/*
+ * ProcStat returns true if the process proc is running, or false otherwise.
+ * err is returned on failure to query the running processes.
+ */
+func ProcStat(proc string) (running bool, err error) {
+	filter := fmt.Sprintf("imagename eq %s", proc)
+	cmd := exec.Command("tasklist", "-fi", filter)
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(o), proc), nil
 }
 
 /* 
@@ -119,13 +134,28 @@ func main() {
 	critmsg := flag.String("C", "", "extra output on critical status")
 	flag.Parse()
 	addr = flag.Arg(0)
+	status = UNKNOWN
+
 	if addr == "" {
 		/* Remote address is a required parameter. */
 		usage()
 		os.Exit(1)
 	}
 
-	status = UNKNOWN
+	if *process != "" {
+		isrunning, err := ProcStat(*process)
+		if err != nil {
+			fmt.Fprintf(os.Stderr,
+			    "Cannot determine status of %s\n", *process)
+			fmt.Fprintf(os.Stderr,
+			    "Error querying process list: %v\n", err)
+			os.Exit(UNKNOWN)
+		}
+		if isrunning == false {
+			fmt.Printf("%s not running\n", *process)
+			os.Exit(OK)
+		}
+	}
 
 	var connected bool
 	var err error
