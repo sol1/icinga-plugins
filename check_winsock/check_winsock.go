@@ -116,6 +116,7 @@ func main() {
 
 	expectedport := flag.String("p", "0", "port number")
 	process := flag.String("n", "", "process name")
+	critmsg := flag.String("C", "", "extra output on critical status")
 	flag.Parse()
 	addr = flag.Arg(0)
 	if addr == "" {
@@ -144,6 +145,9 @@ func main() {
 		status = OK
 	} else {
 		status = CRITICAL
+		if *critmsg != "" {
+			fmt.Println(*critmsg)
+		}
 	}
 
 	os.Exit(status)
