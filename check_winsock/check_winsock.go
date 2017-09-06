@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"log"
 	"os"
@@ -33,19 +34,36 @@ func ProcStat(proc string) (running bool, err error) {
 	return strings.Contains(string(o), proc), nil
 }
 
+func WinNetstat() (output []byte, err error) {
+	cmd := exec.Command("netstat", "-na", "-p", "TCP")
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		return output, err
+	}
+	return o, nil
+}
+
+func WinNetstatProc() (output []byte, err error) {
+	cmd := exec.Command("netstat", "-bna", "-p", "TCP")
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		return output, err
+	}
+	return o, nil
+}
 /* 
  * CheckConnected returns true if the host is currently connected to the address
  * and port, or false otherwise. Error is returned on unsuccessful listing of
  * network info.
  */
 func CheckConnectedPort(addr, port string)(connected bool, err error){
-	file, err := os.Open("output.txt");
+	output, err := WinNetstat()
+	r := bytes.NewReader(output)
 	if err != nil {
 		return false, err
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		cols := strings.Fields(scanner.Text())
 		// ignore UDP and empty lines.
@@ -69,13 +87,13 @@ func CheckConnectedPort(addr, port string)(connected bool, err error){
  * network info.
  */
 func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
-	file, err := os.Open("outputb.txt");
+	output, err := WinNetstat()
+	r := bytes.NewReader(output)
 	if err != nil {
 		return false, err
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(r)
 	var matchedaddr bool = false
 	var curproc string = ""
 	for scanner.Scan() {
