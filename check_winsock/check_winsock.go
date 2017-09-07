@@ -17,7 +17,8 @@ const WARNING  int = 1
 const OK       int = 0
 
 func usage() {
-	fmt.Printf("usage: check_winsock [-p port] address\n")
+	fmt.Printf("usage: check_winsock [-C message] [-n process] [-p port]\n",
+	    "address\n")
 }
 
 /*
