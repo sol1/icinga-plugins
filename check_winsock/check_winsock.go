@@ -183,7 +183,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	expectedport := flag.String("p", "0", "port number")
+	expectedport := flag.String("p", "", "port number")
 	process := flag.String("n", "", "process name")
 	critmsg := flag.String("C", "", "extra output on critical status")
 	flag.Parse()
@@ -220,6 +220,9 @@ func main() {
 		}
 		if connected {
 			fmt.Printf("Socket established to %s\n", addr)
+		} else {
+			status = CRITICAL
+			fmt.Printf("No connection to %s\n", addr)
 		}
 	}
 
@@ -229,7 +232,11 @@ func main() {
 			fmt.Printf("Error listing sockets\n")
 		}
 		if connected {
+			status = OK
 			fmt.Printf("Socket established to %s:%s\n", addr, *expectedport)
+		} else {
+			status = CRITICAL
+			fmt.Printf("No connection to %s:%s\n", addr, *expectedport)
 		}
 	}
 
@@ -240,23 +247,18 @@ func main() {
 			log.Fatal(err)
 		}
 		if connected {
-			fmt.Printf("%s has socket established to %s:%s\n",
-			    *process, addr, *expectedport)
+			status = OK
+			fmt.Printf("%s has socket established to", *process)
+			fmt.Printf(" %s:%s\n", addr, *expectedport)
 		} else {
-			fmt.Printf("Process %s has no sockets", *process)
+			fmt.Printf("%s has no sockets", *process)
 			fmt.Printf("matching criteria %s:%s\n", addr, *expectedport)
 		}
 	}
 
-	if connected {
-		status = OK
-	} else {
-		status = CRITICAL
-		/* Print user-defined message set at command line */
-		if *critmsg != "" {
-			fmt.Println(*critmsg)
-		}
+	/* Print user-defined message set at command line */
+	if *critmsg != "" {
+		fmt.Println(*critmsg)
 	}
-
 	os.Exit(status)
 }
