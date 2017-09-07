@@ -87,7 +87,7 @@ func CheckConnectedPort(addr, port string)(connected bool, err error){
  * network info.
  */
 func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
-	output, err := WinNetstat()
+	output, err := WinNetstatProc()
 	r := bytes.NewReader(output)
 	if err != nil {
 		return false, err
