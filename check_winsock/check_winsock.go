@@ -33,7 +33,10 @@ func ProcStat(proc string) (running bool, err error) {
 	}
 	return strings.Contains(string(o), proc), nil
 }
-
+/*
+ * The WinNetstat functions return the output from executing the netstat
+ * commands on windows. Stdout and Stderr are returned to the caller on error.
+ */
 func WinNetstat() (output []byte, err error) {
 	cmd := exec.Command("netstat", "-na", "-p", "TCP")
 	o, err := cmd.CombinedOutput()
@@ -44,6 +47,10 @@ func WinNetstat() (output []byte, err error) {
 	return o, nil
 }
 
+ /*
+  * WinNetstatProc() lists active sockets and the processes which own them. This
+  * requires administrator privilege
+  */
 func WinNetstatProc() (output []byte, err error) {
 	cmd := exec.Command("netstat", "-bna", "-p", "TCP")
 	o, err := cmd.CombinedOutput()
@@ -76,7 +83,7 @@ func CheckConnected(addr string) (connected bool, err error) {
 	return false, err
 }
 /* 
- * CheckConnected returns true if the host is currently connected to the address
+ * CheckConnectedPort returns true if the host is currently connected to the address
  * and port, or false otherwise. Error is returned on unsuccessful listing of
  * network info.
  */
@@ -108,9 +115,9 @@ func CheckConnectedPort(addr, port string) (connected bool, err error) {
 }
 
 /* 
- * CheckConnectedProc returns true if the process is currently connected to the address
- * and port, or false otherwise. Error is returned on unsuccessful listing of
- * network info.
+ * CheckConnectedProc returns true if the process is currently connected to the
+ * address and port, and the connection is owned by process. Error is returned
+ * on unsuccessful listing of network info.
  */
 func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
 	output, err := WinNetstatProc()
@@ -160,7 +167,7 @@ func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
 	}
 
 	if err := scanner.Err(); err != nil {
-		/* Can't scan? That's bad, bail out */
+		/* Can't even scan? bail out */
 		log.Printf("Error scanning netstat output\n")
 		os.Exit(UNKNOWN)
 	}
