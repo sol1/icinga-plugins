@@ -257,7 +257,7 @@ func main() {
 	}
 
 	/* Print user-defined message set at command line */
-	if *critmsg != "" {
+	if status == CRITICAL && *critmsg != "" {
 		fmt.Println(*critmsg)
 	}
 	os.Exit(status)
