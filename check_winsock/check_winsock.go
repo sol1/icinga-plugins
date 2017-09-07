@@ -17,8 +17,7 @@ const WARNING  int = 1
 const OK       int = 0
 
 func usage() {
-	fmt.Printf("usage: check_winsock [-C message] [-n process] [-p port]\n",
-	    "address\n")
+	fmt.Printf("usage: check_winsock [-C message] [-n process] [-p port] address\n")
 }
 
 /*
@@ -39,6 +38,7 @@ func WinNetstat() (output []byte, err error) {
 	cmd := exec.Command("netstat", "-na", "-p", "TCP")
 	o, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("WinNetstat(): %v\n", err)
 		return output, err
 	}
 	return o, nil
@@ -48,19 +48,43 @@ func WinNetstatProc() (output []byte, err error) {
 	cmd := exec.Command("netstat", "-bna", "-p", "TCP")
 	o, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("WinNetstatProc(): %v\n", err)
 		return output, err
 	}
 	return o, nil
+}
+
+func CheckConnected(addr string) (connected bool, err error) {
+	output, err := WinNetstat()
+	if err != nil {
+		log.Printf("CheckConnected(): error receiving output\n")
+		return false, err
+	}
+
+	r := bytes.NewReader(output)
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		cols := strings.Fields(scanner.Text())
+		// ignore UDP and empty lines.
+		if len(cols) > 0 && cols[0] == "TCP" {
+			longaddr := strings.Split(cols[2], ":")
+			if longaddr[0] == addr {
+				return true, nil
+			}
+		}
+	}
+	return false, err
 }
 /* 
  * CheckConnected returns true if the host is currently connected to the address
  * and port, or false otherwise. Error is returned on unsuccessful listing of
  * network info.
  */
-func CheckConnectedPort(addr, port string)(connected bool, err error){
+func CheckConnectedPort(addr, port string) (connected bool, err error) {
 	output, err := WinNetstat()
 	r := bytes.NewReader(output)
 	if err != nil {
+		log.Printf("CheckConnectedPort(): error receving output\n")
 		return false, err
 	}
 
@@ -77,7 +101,8 @@ func CheckConnectedPort(addr, port string)(connected bool, err error){
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Printf("Error scanning netstat output\n")
+		os.Exit(UNKNOWN)
 	}
 	return false, err
 }
@@ -89,11 +114,12 @@ func CheckConnectedPort(addr, port string)(connected bool, err error){
  */
 func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
 	output, err := WinNetstatProc()
-	r := bytes.NewReader(output)
 	if err != nil {
+		log.Printf("CheckConnectedProc(): netstat error: %v\n", err)
 		return false, err
 	}
 
+	r := bytes.NewReader(output)
 	scanner := bufio.NewScanner(r)
 	var matchedaddr bool = false
 	var curproc string = ""
@@ -134,7 +160,9 @@ func CheckConnectedProc(proc, addr, port string)(connected bool, err error){
 	}
 
 	if err := scanner.Err(); err != nil {
-	    log.Fatal(err)
+		/* Can't scan? That's bad, bail out */
+		log.Printf("Error scanning netstat output\n")
+		os.Exit(UNKNOWN)
 	}
 	return false, err
 }
@@ -178,15 +206,38 @@ func main() {
 
 	var connected bool
 	var err error
-	connected, err = CheckConnectedPort(addr, *expectedport)
-	if err != nil {
-		log.Fatal(err)
+	if *expectedport == "" {
+		connected, err = CheckConnected(addr)
+		if err != nil {
+			fmt.Printf("Cannot check sockets\n")
+		}
+		if connected {
+			fmt.Printf("Socket established to %s\n", addr)
+		}
+	}
+
+	if *expectedport != "" && *process == "" {
+		connected, err = CheckConnectedPort(addr, *expectedport)
+		if err != nil {
+			fmt.Printf("Error listing sockets\n")
+		}
+		if connected {
+			fmt.Printf("Socket established to %s:%s\n", addr, *expectedport)
+		}
 	}
 
 	if *process != "" {
 		connected, err = CheckConnectedProc(*process, addr, *expectedport)
 		if err != nil {
+			fmt.Printf("Error listing sockets\n")
 			log.Fatal(err)
+		}
+		if connected {
+			fmt.Printf("%s has socket established to %s:%s\n",
+			    *process, addr, *expectedport)
+		} else {
+			fmt.Printf("Process %s has no sockets", *process)
+			fmt.Printf("matching criteria %s:%s\n", addr, *expectedport)
 		}
 	}
 
@@ -194,6 +245,7 @@ func main() {
 		status = OK
 	} else {
 		status = CRITICAL
+		/* Print user-defined message set at command line */
 		if *critmsg != "" {
 			fmt.Println(*critmsg)
 		}
