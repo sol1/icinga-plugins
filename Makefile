@@ -10,13 +10,13 @@ build: ${PROG}
 all:
 	@for dir in ${SUBDIR}; do \
 		echo "===> $$dir"; \
-		make -C $$dir build; \
+		make -C $$dir ${MAKE_FLAGS} build; \
 	done
 
 ${SUBDIR}::
 	@if test -d $@; then \
 		echo "===> $@"; \
-		exec make -C $@ build; \
+		exec make -C $@ ${MAKE_FLAGS} build; \
 	fi
 
 ${PROG}:: ${SRCS}
@@ -37,7 +37,7 @@ ${PROG}:: ${SRCS}
 	rm -f $@
 	cp $< $@
 
-${PREFIX} ${BINDIR} ${MANDIR}:
+${BINDIR} ${MANDIR}:
 	mkdir -p $@
 
 ${PREFIX}/icinga-plugins: clean
