@@ -1,0 +1,48 @@
+.Dd $Mdocdate$
+.Dt check_winsock 1
+.Os
+.Sh NAME
+.Nm check_winsock
+.Nd Check for an established TCP socket
+.Sh SYNOPSIS
+.Nm
+.Op Fl p Ar port
+.Op Fl n Ar process
+.Ar address
+.Sh DESCRIPTION
+.Nm
+queries the list of current active TCP sockets and confirms if any are
+established with the given
+.Ar address .
+Properties of the socket other than the remote address may also be checked to
+confirm the establishment of a socket as expected.
+.Pp
+The options are as follows: 
+.Pp
+.Bl -tag -width Ds
+.It Fl n Ar process
+Ensure the socket is used by the process
+.Ar process .
+.It Fl p Ar port
+Only report on sockets established to port number
+.Ar port
+.El
+.Sh EXAMPLES
+Test if there is a socket established with 172.28.160.1:
+.Pp
+.Dl $ check_winsock 172.28.160.1
+.Pp
+Test if Firefox has established a socket to 220.233.20.1, on the https port:
+.Pp
+.Dl $ check_winsock -p 443 -n firefox.exe 220.233.20.1
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa icinga2.conf
+Example
+.Xr icinga2 8
+configuration implementing
+.Nm .
+This file is distributed with the source code.
+.Sh SEE ALSO
+.Xr icinga2 8
+.Xr icinga2.conf 5
