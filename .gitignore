@@ -1,4 +1,5 @@
 .swp
 .vscode
-rt.auth
+build
 icinga.auth
+rt.auth
