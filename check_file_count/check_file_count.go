@@ -15,9 +15,9 @@ func usage() {
 	fmt.Printf("usage: check_file_count [-w count] [-c count] path\n")
 }
 
-// listpath takes a slice of FileInfos returned from os.Readdir, and prints a
+// FileNames takes a slice of FileInfos returned from os.Readdir, and prints a
 // listing of the file names in the slice.
-func ls(fi []os.FileInfo) {
+func FileNames(fi []os.FileInfo) {
 	for i:= 0; i < len(fi); i++ {
 		filename := fi[i].Name()
 		fmt.Printf("%s\n", filename)
@@ -64,6 +64,6 @@ func main() {
 	}
 
 	fmt.Printf("%d files present in %s\n", count, dir)
-	ls(fileinfo)
+	FileNames(fileinfo)
 	os.Exit(ret)
 }
