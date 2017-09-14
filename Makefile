@@ -48,15 +48,15 @@ ${PREFIX}/icinga-plugins: clean
 ${PREFIX}/icinga-plugins.tar.gz: ${PREFIX}/icinga-plugins
 	tar -f $@ -C build -cvz icinga-plugins
 
-${PREFIX}/sol1-icingautil.deb: build
+${PREFIX}/sol1-icingautil.deb: install
 	fpm -s dir -t deb -s dir -C build -n sol1-icingautil .
 
-${PREFIX}/sol1-icingautil.rpm: build
+${PREFIX}/sol1-icingautil.rpm: install
 	fpm -s dir -t rpm -s dir -C build -n sol1-icingautil .
 
-.PHONY: build all clean cleanall dist install
+.PHONY: build all clean dist install package
 clean:
-	rm -f ${PROG}
+	rm -f ${PROG} *.rpm *.deb *.tar.gz
 	@if [ "${PROG}" = "" ]; then \
 		for entry in ${SUBDIR}; do \
 			echo "===> $$entry"; \
@@ -79,3 +79,5 @@ install: all ${PREFIX} ${BINDIR} ${MANDIR}
 		install -m 444 $$p/$$p.1 ${MANDIR}; \
 		fi; \
 	done
+
+package: ${PREFIX}/sol1-icingautil.deb ${PREFIX}/sol1-icingautil.rpm
