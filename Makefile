@@ -48,6 +48,12 @@ ${PREFIX}/icinga-plugins: clean
 ${PREFIX}/icinga-plugins.tar.gz: ${PREFIX}/icinga-plugins
 	tar -f $@ -C build -cvz icinga-plugins
 
+${PREFIX}/sol1-icingautil.deb: build
+	fpm -s dir -t deb -s dir -C build -n sol1-icingautil .
+
+${PREFIX}/sol1-icingautil.rpm: build
+	fpm -s dir -t rpm -s dir -C build -n sol1-icingautil .
+
 .PHONY: build all clean cleanall dist install
 clean:
 	rm -f ${PROG}
