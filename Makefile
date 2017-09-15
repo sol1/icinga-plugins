@@ -56,7 +56,7 @@ ${PREFIX}/sol1-icingautil.rpm: install
 
 .PHONY: build all clean dist install package
 clean:
-	rm -f ${PROG} *.rpm *.deb *.tar.gz
+	rm -f ${PROG} *.rpm *.deb *.tar.gz *.exe
 	@if [ "${PROG}" = "" ]; then \
 		for entry in ${SUBDIR}; do \
 			echo "===> $$entry"; \
