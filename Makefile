@@ -40,6 +40,19 @@ ${PROG}:: ${SRCS}
 ${BINDIR} ${MANDIR}:
 	mkdir -p $@
 
+# Create a zip archive for installation on windows.
+${PREFIX}/icinga-plugins.zip: all ${PREFIX}/icinga-plugins/install.bat
+	mkdir -p ${PREFIX}/icinga-plugins
+	for entry in ${SUBDIR}; do \
+		echo "===> $$entry"; \
+		cp $$entry/$$entry ${PREFIX}/icinga-plugins; \
+	done
+	zip -r $@ ${PREFIX}/icinga-plugins
+
+# Include windows install script in the distributed zip.
+${PREFIX}/icinga-plugins/install.bat: script/install.bat
+	cp script/install.bat $@
+
 ${PREFIX}/icinga-plugins: clean
 	mkdir -p $@
 	cp -R ${SUBDIR} $@
@@ -64,9 +77,8 @@ clean:
 		done; \
 		rm -rf build; \
 	fi
-		
 
-dist: ${PREFIX}/icinga-plugins.tar.gz
+dist: ${PREFIX}/icinga-plugins.tar.gz ${PREFIX}/icinga-plugins.zip
 
 install: all ${PREFIX} ${BINDIR} ${MANDIR}
 	@echo "Installing plugins to ${BINDIR}"
