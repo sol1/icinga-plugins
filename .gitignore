@@ -1,5 +1,7 @@
 .swp
 .vscode
 build
+dist/*.tar.gz
+dist/windows
 icinga.auth
 rt.auth

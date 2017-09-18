@@ -1,4 +1,5 @@
 PROG=check_file_count
+EXE= ${PROG}.exe
 SRCS=${PROG}.go
 
 .PHONY: test
