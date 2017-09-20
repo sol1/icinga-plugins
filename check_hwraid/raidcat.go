@@ -25,9 +25,8 @@ const CRIT int = 2
 const UNKNOWN int = 3
 
 func ControllerStat(helper string) (cmsg []byte, err error) {
-	// TODO(olly): ensure full path to the helper script is passed to
-	// exec.Command(), not just name of script.
-	output, err := exec.Command(helper).Output()
+	path := filepath.Join("C:", "Program Files", "check_hwraid", helper)
+	output, err := exec.Command(path).Output()
 	if err != nil {
 		log.Printf("ControllerStat(): Error running %s: %v", helper, err)
 		return nil, err
