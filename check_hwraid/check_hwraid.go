@@ -61,11 +61,11 @@ func main() {
 		os.Exit(UNKNOWN)
 	}
 	if c.State == OK {
-		fmt.Printf("%s reports state is %s\n", c.Family, c.State)
+		fmt.Printf("OK: %s reports state is %s\n", c.Family, c.State)
 		os.Exit(K)
 	}
 	if c.State != OK {
-		fmt.Printf("controller %s state is %s\n", c.Family, c.State)
+		fmt.Printf("CRITICAL: controller %s state is %s\n", c.Family, c.State)
 		os.Exit(CRIT)
 	}
 }
