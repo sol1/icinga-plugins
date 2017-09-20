@@ -1,29 +1,36 @@
-RAIDCAT(1) - General Commands Manual
+CHECK\_HWRAID(1) - General Commands Manual
 
 # NAME
 
-**raidcat** - does stuff
+**check\_hwraid** - query the health of a RAID controller
 
 # SYNOPSIS
 
-**raidcat**
-\[**-t**&nbsp;**-devtype**]
-*path*
+**check\_hwraid**
+\[**-t**]
+*familytype*
 
 # DESCRIPTION
 
-**raidcat**
-Parses raidcat data...?
+The
+**check\_hwraid**
+icinga2(8)
+plugin returns the status of supported hardware RAID controllers and optionally
+any diagnostic information from the controller.
+
+The plugin itself does not query the controller; helper scripts are called from
+**check\_hwraid**
+which return a predefined JSON structure to be processed.
 
 The options are as follows:
 
 **-t**
 
-> Set the device type. The default is...
+> Set the device type. If undefined, standard input is read.
 
 # EXIT STATUS
 
-**raidcat**
+**check\_hwraid**
 exits with good exit codes
 
 # EXAMPLES
@@ -36,4 +43,4 @@ Check an intel raid device...
 
 icinga2(1)
 
-OpenBSD 6.1 - September 19, 2017
+OpenBSD 6.1 - September 20, 2017
