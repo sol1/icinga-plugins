@@ -1,4 +1,4 @@
-PROG= raidcat
+PROG= check_hwraid
 SRCS= ${PROG}.go
 
 all: ${PROG} README.md
