@@ -10,11 +10,6 @@ import (
 	"os/exec"
 )
 
-type Controller struct {
-	Family string
-	State	string
-}
-
 const OK string = "OK"
 const DEGRADED string = "DEGRADED"
 const REBUILDING string = "REBUILDING"
@@ -24,9 +19,14 @@ const WARN int = 1
 const CRIT int = 2
 const UNKNOWN int = 3
 
+
+type Controller struct {
+	Family string
+	State	string
+}
+
 func ControllerStat(helper string) (cmsg []byte, err error) {
-	path := filepath.Join("C:", "Program Files", "check_hwraid", helper)
-	output, err := exec.Command(path).Output()
+	output, err := exec.Command(helper).Output()
 	if err != nil {
 		log.Printf("ControllerStat(): Error running %s: %v", helper, err)
 		return nil, err
@@ -60,7 +60,6 @@ func main() {
 		fmt.Printf("Error unmarshalling json: %v\n", err)
 		os.Exit(UNKNOWN)
 	}
-
 	if c.State == OK {
 		fmt.Printf("%s reports state is %s\n", c.Family, c.State)
 		os.Exit(K)
