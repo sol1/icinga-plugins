@@ -7,7 +7,7 @@ WINDOWS?=
 
 # Set plugins to be included in the main build. Keep this alphabetically sorted.
 SUBDIR= check_age check_ardomedf check_clock check_file_count check_hadr \
-	check_oncall
+	check_oncall check_winsock
 
 build: ${PROG}
 
