@@ -94,6 +94,7 @@ clean:
 			make -C $$entry clean; \
 		done; \
 		rm -rf dist/icinga-plugins dist/*.tar.gz dist/windows; \
+		rm -rf build; \
 	fi
 
 # By default, install build into dummy unix hierarchy under $PREFIX, which by
