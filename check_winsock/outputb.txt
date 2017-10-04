@@ -1,0 +1,275 @@
+
+Active Connections
+
+  Proto  Local Address          Foreign Address        State
+  TCP    0.0.0.0:22             0.0.0.0:0              LISTENING
+  SshProxy
+ [svchost.exe]
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING
+  RpcSs
+ [svchost.exe]
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    0.0.0.0:3389           0.0.0.0:0              LISTENING
+  TermService
+ [svchost.exe]
+  TCP    0.0.0.0:5357           0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    0.0.0.0:23443          0.0.0.0:0              LISTENING
+ [Ditto.exe]
+  TCP    0.0.0.0:49664          0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    0.0.0.0:49665          0.0.0.0:0              LISTENING
+  EventLog
+ [svchost.exe]
+  TCP    0.0.0.0:49666          0.0.0.0:0              LISTENING
+  Schedule
+ [svchost.exe]
+  TCP    0.0.0.0:49667          0.0.0.0:0              LISTENING
+ [spoolsv.exe]
+  TCP    0.0.0.0:49670          0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    0.0.0.0:49678          0.0.0.0:0              LISTENING
+ [lsass.exe]
+  TCP    127.0.0.1:5354         0.0.0.0:0              LISTENING
+ [mDNSResponder.exe]
+  TCP    127.0.0.1:5939         0.0.0.0:0              LISTENING
+ [TeamViewer_Service.exe]
+  TCP    127.0.0.1:7778         0.0.0.0:0              LISTENING
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:7778         127.0.0.1:56988        ESTABLISHED
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:44430        0.0.0.0:0              LISTENING
+ [FoxitConnectedPDFService.exe]
+  TCP    127.0.0.1:56982        127.0.0.1:56983        ESTABLISHED
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:56983        127.0.0.1:56982        ESTABLISHED
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:56984        127.0.0.1:56985        ESTABLISHED
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:56985        127.0.0.1:56984        ESTABLISHED
+ [TracSrvWrapper.exe]
+  TCP    127.0.0.1:56988        127.0.0.1:7778         ESTABLISHED
+ [TrGUI.exe]
+  TCP    127.0.0.1:56989        127.0.0.1:56991        ESTABLISHED
+ [TrGUI.exe]
+  TCP    127.0.0.1:56991        127.0.0.1:56989        ESTABLISHED
+ [TrGUI.exe]
+  TCP    127.0.0.1:61042        127.0.0.1:61043        ESTABLISHED
+ [TeamViewer_Service.exe]
+  TCP    127.0.0.1:61043        127.0.0.1:61042        ESTABLISHED
+ [TeamViewer_Service.exe]
+  TCP    1.1.1.32:139      0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    1.1.1.32:49475    54.230.132.132:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49477    111.221.29.254:443     TIME_WAIT
+  TCP    1.1.1.32:49478    23.99.125.126:443      TIME_WAIT
+  TCP    1.1.1.32:49482    1.1.1.30:445      ESTABLISHED
+ Can not obtain ownership information
+  TCP    1.1.1.32:49485    111.221.29.96:443      ESTABLISHED
+ [Explorer.EXE]
+ [chrome.exe]
+ [chrome.exe]
+  TCP    1.1.1.32:49501    130.211.26.229:443     ESTABLISHED
+ [chrome.exe]
+  TCP    1.1.1.32:49502    130.211.16.53:443      ESTABLISHED
+ [chrome.exe]
+  TCP    1.1.1.32:49503    54.230.132.132:443     ESTABLISHED
+ [slack.exe]
+ [chrome.exe]
+  TCP    1.1.1.32:49508    111.221.29.254:443     TIME_WAIT
+  TCP    1.1.1.32:49512    220.233.151.13:80      CLOSE_WAIT
+ [chrome.exe]
+  TCP    1.1.1.32:49513    220.233.151.13:80      CLOSE_WAIT
+ [chrome.exe]
+  TCP    1.1.1.32:49525    23.32.53.162:80        TIME_WAIT
+  TCP    1.1.1.32:49526    23.32.54.142:80        TIME_WAIT
+  TCP    1.1.1.32:49527    23.32.54.142:80        TIME_WAIT
+  TCP    1.1.1.32:49530    23.66.253.41:80        TIME_WAIT
+  TCP    1.1.1.32:49531    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49532    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49533    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49534    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49535    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49536    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49552    52.62.178.161:443      ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49555    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49556    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49557    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+  TCP    1.1.1.32:49558    151.101.28.102:443     ESTABLISHED
+ [slack.exe]
+ [chrome.exe]
+  TCP    1.1.1.32:49575    111.221.29.254:443     TIME_WAIT
+  TCP    1.1.1.32:49576    58.96.8.104:80         ESTABLISHED
+  ProfSvc
+ [svchost.exe]
+  TCP    1.1.1.32:49593    220.233.129.230:80     TIME_WAIT
+  TCP    1.1.1.32:49622    220.233.129.230:80     ESTABLISHED
+ [nagstamon.exe]
+  TCP    192.168.56.1:139       0.0.0.0:0              LISTENING
+ Can not obtain ownership information
+  TCP    [::]:22                [::]:0                 LISTENING
+  SshProxy
+ [svchost.exe]
+  TCP    [::]:135               [::]:0                 LISTENING
+  RpcSs
+ [svchost.exe]
+  TCP    [::]:445               [::]:0                 LISTENING
+ Can not obtain ownership information
+  TCP    [::]:3389              [::]:0                 LISTENING
+  TermService
+ [svchost.exe]
+  TCP    [::]:5357              [::]:0                 LISTENING
+ Can not obtain ownership information
+  TCP    [::]:49664             [::]:0                 LISTENING
+ Can not obtain ownership information
+  TCP    [::]:49665             [::]:0                 LISTENING
+  EventLog
+ [svchost.exe]
+  TCP    [::]:49666             [::]:0                 LISTENING
+  Schedule
+ [svchost.exe]
+  TCP    [::]:49667             [::]:0                 LISTENING
+ [spoolsv.exe]
+  TCP    [::]:49670             [::]:0                 LISTENING
+ Can not obtain ownership information
+  TCP    [::]:49678             [::]:0                 LISTENING
+ [lsass.exe]
+  UDP    0.0.0.0:123            *:*                    
+  W32Time
+ [svchost.exe]
+  UDP    0.0.0.0:500            *:*                    
+  IKEEXT
+ [svchost.exe]
+  UDP    0.0.0.0:3389           *:*                    
+  TermService
+ [svchost.exe]
+  UDP    0.0.0.0:3702           *:*                    
+ [dashost.exe]
+  UDP    0.0.0.0:3702           *:*                    
+ [dashost.exe]
+  UDP    0.0.0.0:4500           *:*                    
+  IKEEXT
+ [svchost.exe]
+  UDP    0.0.0.0:5050           *:*                    
+  CDPSvc
+ [svchost.exe]
+  UDP    0.0.0.0:5353           *:*                    
+  Dnscache
+ [svchost.exe]
+  UDP    0.0.0.0:5353           *:*                    
+ [chrome.exe]
+  UDP    0.0.0.0:5353           *:*                    
+ [chrome.exe]
+  UDP    0.0.0.0:5353           *:*                    
+ [chrome.exe]
+  UDP    0.0.0.0:5353           *:*                    
+ [chrome.exe]
+  UDP    0.0.0.0:5355           *:*                    
+  Dnscache
+ [svchost.exe]
+  UDP    0.0.0.0:61926          *:*                    
+ [dashost.exe]
+  UDP    0.0.0.0:62303          *:*                    
+ [mDNSResponder.exe]
+  UDP    0.0.0.0:64890          *:*                    
+ [TeamViewer_Service.exe]
+  UDP    127.0.0.1:1900         *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    127.0.0.1:63865        *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    1.1.1.32:137      *:*                    
+ Can not obtain ownership information
+  UDP    1.1.1.32:138      *:*                    
+ Can not obtain ownership information
+  UDP    1.1.1.32:1900     *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    1.1.1.32:5353     *:*                    
+ [mDNSResponder.exe]
+  UDP    1.1.1.32:5353     *:*                    
+ [TeamViewer_Service.exe]
+  UDP    1.1.1.32:63863    *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    192.168.56.1:137       *:*                    
+ Can not obtain ownership information
+  UDP    192.168.56.1:138       *:*                    
+ Can not obtain ownership information
+  UDP    192.168.56.1:1900      *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    192.168.56.1:5353      *:*                    
+ [mDNSResponder.exe]
+  UDP    192.168.56.1:5353      *:*                    
+ [TeamViewer_Service.exe]
+  UDP    192.168.56.1:63864     *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [::]:123               *:*                    
+  W32Time
+ [svchost.exe]
+  UDP    [::]:500               *:*                    
+  IKEEXT
+ [svchost.exe]
+  UDP    [::]:3389              *:*                    
+  TermService
+ [svchost.exe]
+  UDP    [::]:3702              *:*                    
+ [dashost.exe]
+  UDP    [::]:3702              *:*                    
+ [dashost.exe]
+  UDP    [::]:4500              *:*                    
+  IKEEXT
+ [svchost.exe]
+  UDP    [::]:5353              *:*                    
+  Dnscache
+ [svchost.exe]
+  UDP    [::]:5353              *:*                    
+ [chrome.exe]
+  UDP    [::]:5353              *:*                    
+ [chrome.exe]
+  UDP    [::]:5355              *:*                    
+  Dnscache
+ [svchost.exe]
+  UDP    [::]:61927             *:*                    
+ [dashost.exe]
+  UDP    [::]:62304             *:*                    
+ [mDNSResponder.exe]
+  UDP    [::]:64891             *:*                    
+ [TeamViewer_Service.exe]
+  UDP    [::1]:1900             *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [::1]:5353             *:*                    
+ [mDNSResponder.exe]
+  UDP    [::1]:5353             *:*                    
+ [TeamViewer_Service.exe]
+  UDP    [::1]:63862            *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [fe80::b017:bcac:7eaf:440c%25]:1900  *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [fe80::b017:bcac:7eaf:440c%25]:63860  *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [fe80::b570:b85c:8b42:38b5%8]:1900  *:*                    
+  SSDPSRV
+ [svchost.exe]
+  UDP    [fe80::b570:b85c:8b42:38b5%8]:63861  *:*                    
+  SSDPSRV
+ [svchost.exe]
