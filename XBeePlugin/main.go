@@ -43,7 +43,7 @@ func main() {
 	}
 
 	//Establish connection with gateway SSH server
-	conn, err := ssh.Dial("tcp", "192.168.11.46:22", config)
+	conn, err := ssh.Dial("tcp", "someaddress:22", config)
 	if err != nil {
 		log.Fatal("unable to connect: ", err)
 	}
