@@ -11,7 +11,6 @@ function Get-JobResult {
 	return $result
 }
 
-
 $jobs = $null
 if ($name) {
 	$jobs = Get-VBRJob -Name $name
@@ -20,14 +19,14 @@ if ($name) {
 }
 
 $numfail, $numwarn = 0
-for ($i = 0; $i -lt $jobs.length; $i++) {
-	$j = $jobs[$i]
-	$lastresult = Get-JobResult $j
+for ($index = 0; $index -lt $jobs.length; $index++) {
+	$currentjob = $jobs[$index]
+	$lastresult = Get-JobResult $currentjob
 	switch ($lastresult) {
 	"Success" { continue }
-	"Warning" { Write-Host "job" $j.Name "finished with warning" }
-	"Failed"  { Write-Host "job" $j.Name "failed"; $numfail++ }
-	default   { Write-Host "Cannot determine status of job" $j.Name }
+	"Warning" { Write-Host "job" $currentjob.Name "finished with warning" }
+	"Failed"  { Write-Host "job" $currentjob.Name "failed"; $numfail++ }
+	default   { Write-Host "Cannot determine status of job" $currentjob.Name }
 	}
 }
 
