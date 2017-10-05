@@ -1,3 +1,7 @@
+param (
+	[string]$name = $null
+)
+
 asnp VeeamPSSnapin
 
 function Get-JobResult {
@@ -7,9 +11,16 @@ function Get-JobResult {
 	return $result
 }
 
-$jobs = Get-VBRJob
+
+$jobs = $null
+if ($name) {
+	$jobs = Get-VBRJob -Name $name
+} else {
+	$jobs = Get-VBRJob
+}
+
 $numfail, $numwarn = 0
-For ($i = 0; $i -lt $jobs.length; $i++) {
+for ($i = 0; $i -lt $jobs.length; $i++) {
 	$j = $jobs[$i]
 	$lastresult = Get-JobResult $j
 	switch ($lastresult) {
