@@ -1,14 +1,31 @@
 asnp VeeamPSSnapin
 
-# Get an array of veeam jobs called 'jobs', then loop through each job querying
-# its last result.
+function Get-JobResult {
+	$job = $args[0]
+	$session = Get-VBRBackupSession | where {$_.jobID -eq $job.Id.Guid} | Sort EndTimeUTC -Descending | Select -First 1
+	$result = $session.Result
+	return $result
+}
+
 $jobs = Get-VBRJob
+$numfail, $numwarn = 0
 For ($i = 0; $i -lt $jobs.length; $i++) {
 	$j = $jobs[$i]
-	$status = $job.GetLastResult()
-	switch ($status) {
-	"Failure" { Write-Host "Last run of job" $j.Name "failed" }
-	"Success" { Write-Host "Last run of job" $j.Name "succeeded" }
-	default   { Write-Host "Cannot determine state of last run of" $j.Name }
+	$lastresult = Get-JobResult $j
+	switch ($lastresult) {
+	"Success" { continue }
+	"Warning" { Write-Host "job" $j.Name "finished with warning" }
+	"Failed"  { Write-Host "job" $j.Name "failed"; $numfail++ }
+	default   { Write-Host "Cannot determine status of job" $j.Name }
 	}
 }
+
+if ($numfail -gt 0) {
+	exit 2
+} elseif ($numwarn -gt 0) {
+	exit 1
+} elseif (($numfail -eq 0) -and ($numwarn -eq 0)) {
+	echo "veeam backups are ok :)"
+	exit 0
+}
+exit 3
