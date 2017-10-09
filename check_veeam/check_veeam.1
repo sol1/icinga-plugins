@@ -1,0 +1,47 @@
+.Dd $Mdocdate$
+.Dt CHECK_VEEAM 1
+.Sh NAME
+.Nm check_veeam
+.Nd Veeam backup state checker
+.Sh SYNOPSIS
+.Nm
+.Op Fl Name Ar filter
+.Sh DESCRIPTION
+.Nm
+collects the result of the most recent run of Veeam backup or backup copy jobs.
+The names of any jobs that did not succeed are printed to standard output.
+This includes jobs in a
+.Sq warning
+or
+.Sq failed
+state.
+.Pp
+The following options may be set:
+.Pp
+.Bl -tag -width Ds
+.It Fl Name Ar filter
+Only check jobs whose names match the given filter. The * character may be used
+as a wildcard. 
+.Sh EXAMPLES
+Check whether the job 'database offsite' completed successfully:
+.Pp
+.Dl $ check_veeam -Name Qq "database offsite"
+.Pp
+Check that all the jobs starting with 'web' completed successfully:
+.Pp
+.Dl $ check_veeam -Name web* 
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa icinga2.conf
+Example
+.Xr icinga2 8
+configuration for use with
+.Nm ,
+distributed with the source code.
+.El
+.Sh EXIT STATUS
+.Ex -std
+Error codes are suitable for nagios/icinga-style checks.
+.Sh SEE ALSO
+.Xr icinga2 8
+.Xr icinga2.conf 5
