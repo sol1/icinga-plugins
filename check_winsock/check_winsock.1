@@ -11,13 +11,9 @@
 .Ar address
 .Sh DESCRIPTION
 .Nm
-queries the list of current active TCP sockets and confirms if any are
-established with the given
+tests if any active TCP sockets are connected with the given
 .Ar address .
-Properties of the socket other than the remote address may also be checked to
-confirm the establishment of a socket as expected.
-.Pp
-The options are as follows: 
+Other properties of the socket may be tested using the following options: 
 .Pp
 .Bl -tag -width Ds
 .It Fl n Ar process
