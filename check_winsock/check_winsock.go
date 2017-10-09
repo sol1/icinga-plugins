@@ -188,7 +188,6 @@ func main() {
 	critmsg := flag.String("C", "", "extra output on critical status")
 	flag.Parse()
 	addr = flag.Arg(0)
-	status = UNKNOWN
 
 	if addr == "" {
 		/* Remote address is a required parameter. */
@@ -206,23 +205,30 @@ func main() {
 			os.Exit(UNKNOWN)
 		}
 		if isrunning == false {
-			fmt.Printf("%s not running\n", *process)
+			fmt.Printf("OK: %s not running\n", *process)
 			os.Exit(OK)
 		}
 	}
 
+	// TODO(olly): these vars have too wide scope??
 	var connected bool
 	var err error
+	/*
+	 * If no port specified on command line, we only check connectivity to
+	 * the remote address.
+	 */
+	status = UNKNOWN
 	if *expectedport == "" {
 		connected, err = CheckConnected(addr)
 		if err != nil {
 			fmt.Printf("Cannot check sockets\n")
 		}
 		if connected {
-			fmt.Printf("Socket established to %s\n", addr)
+			status = OK
+			fmt.Printf("OK: Socket established to %s\n", addr)
 		} else {
 			status = CRITICAL
-			fmt.Printf("No connection to %s\n", addr)
+			fmt.Printf("CRITICAL: No connection to %s\n", addr)
 		}
 	}
 
@@ -233,10 +239,10 @@ func main() {
 		}
 		if connected {
 			status = OK
-			fmt.Printf("Socket established to %s:%s\n", addr, *expectedport)
+			fmt.Printf("OK: Socket established to %s:%s\n", addr, *expectedport)
 		} else {
 			status = CRITICAL
-			fmt.Printf("No connection to %s:%s\n", addr, *expectedport)
+			fmt.Printf("CRITICAL: No connection to %s:%s\n", addr, *expectedport)
 		}
 	}
 
@@ -248,10 +254,11 @@ func main() {
 		}
 		if connected {
 			status = OK
-			fmt.Printf("%s has socket established to", *process)
-			fmt.Printf(" %s:%s\n", addr, *expectedport)
+			fmt.Printf("OK: %s has socket established to", *process)
+			fmt.Printf(" %s\n", addr, *expectedport)
 		} else {
-			fmt.Printf("%s has no sockets", *process)
+			status = CRITICAL
+			fmt.Printf("CRITICAL: %s has no sockets", *process)
 			fmt.Printf("matching criteria %s:%s\n", addr, *expectedport)
 		}
 	}
