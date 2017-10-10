@@ -21,7 +21,8 @@ ${SUBDIR}::
 		exec make -C $@ ${MAKE_FLAGS} build; \
 	fi
 
-# Implicit rules.
+# Implicit rules. This defines how to make 'program.exe' from 'program.go', or
+# 'program' from 'program.sh', for example.
 .SUFFIXES: .exe .go .pl .sh
 .go:
 	go build -o $@ $>
