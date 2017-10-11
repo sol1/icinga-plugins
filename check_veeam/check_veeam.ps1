@@ -22,6 +22,7 @@ if ($name) {
 
 $numfail = 0
 $numwarn = 0
+$numunknown = 0
 for ($index = 0; $index -lt $jobs.length; $index++) {
 	$currentjob = $jobs[$index]
 	$lastresult = Get-JobResult $currentjob
@@ -29,13 +30,16 @@ for ($index = 0; $index -lt $jobs.length; $index++) {
 	"Success" { Write-Host "job" $currentjob.Name "succeeded"; continue }
 	"Warning" { Write-Host "job" $currentjob.Name "finished with warning"; $numwarn++ }
 	"Failed"  { Write-Host "job" $currentjob.Name "failed"; $numfail++ }
-	default   { Write-Host "Cannot determine status of job" $currentjob.Name }
+	default   { Write-Host "Cannot determine status of job" $currentjob.Name; numunknown++ }
 	}
 }
 
 if ($numfail -gt 0) {
 	echo "CRITICAL: Backup jobs failed"
 	exit 2
+} elseif ($numunknown -gt 0) {
+	echo "UNKNOWN: Could not determine status of all jobs"
+	exit 3
 } elseif ($numwarn -gt 0) {
 	echo "WARNING: Some backups completed with warnings"
 	exit 1
